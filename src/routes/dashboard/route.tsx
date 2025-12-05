@@ -1,4 +1,6 @@
 import { createFileRoute, Outlet } from '@tanstack/react-router'
+import { SidebarProvider, SidebarTrigger } from '../../components/ui/sidebar'
+import { AppSidebar } from '../../components/app-sidebar'
 
 export const Route = createFileRoute('/dashboard')({
   component: RouteComponent,
@@ -6,9 +8,12 @@ export const Route = createFileRoute('/dashboard')({
 
 function RouteComponent() {
   return (
-    <div>
-      <div>Hello This is dashboard layout</div>
-      <Outlet/>
-    </div>
+    <SidebarProvider>
+      <AppSidebar />
+      <main className='p-4'>
+        <SidebarTrigger />
+        <Outlet/>
+      </main>
+    </SidebarProvider>
 )
 }
