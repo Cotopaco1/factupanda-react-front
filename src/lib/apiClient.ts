@@ -1,14 +1,18 @@
 import axios, { AxiosError } from "axios";
+import { useUserStore } from "@/stores/userStore";
+
+
 
 export const apiClient = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
-  withCredentials : true,
+  // withCredentials : true, // Estamos usando stateless
   headers : {
-    "Accept-Language" : 'es'
+    "Accept-Language" : 'es',
   }
 });
-apiClient.defaults.xsrfCookieName = "XSRF-TOKEN";
-apiClient.defaults.xsrfHeaderName = "X-XSRF-TOKEN";
+
+// apiClient.defaults.xsrfCookieName = "XSRF-TOKEN"; // Estamos usando stateless
+// apiClient.defaults.xsrfHeaderName = "X-XSRF-TOKEN"; // Estamos usando stateless
 
 const csrfToken = async (error: AxiosError) => {
     const { response, config } = error;
@@ -39,4 +43,12 @@ const csrfToken = async (error: AxiosError) => {
     return Promise.reject(error);
   }
 
-apiClient.interceptors.response.use((config) => config, csrfToken);
+// apiClient.interceptors.response.use((config) => config, csrfToken); // Estamos en stateless
+
+apiClient.interceptors.request.use((config) => {
+  const token = localStorage.getItem('tkn');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
