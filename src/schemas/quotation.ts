@@ -4,8 +4,7 @@ export const productSchema = z.object({
   name: z.string().min(1, "El nombre es obligatorio"),
   description: z.string().optional(),
   unit_of_measurement : z.string().min(1, "La unidad de medida es obligatoria"),
-  unit: z.string().min(1, "La unidad es obligatoria"),
-  unit_price: z.coerce.number().min(0, "El precio debe ser mayor o igual a 0"),
+  unit_price: z.coerce.number().min(1, "El precio debe ser mayor o igual a 1"),
   quantity: z.coerce.number().min(1, "La cantidad debe ser al menos 1"),
   discount_percentage: z.coerce.number().min(0).max(100).optional(), // porcentaje, por ejemplo
   tax_percentage: z.coerce.number().min(0).max(100).optional(),
@@ -30,10 +29,14 @@ export const quotationSchema = z.object({
         .int()
         .positive("Debes seleccionar una fecha de vencimiento"),
 
+    temporary_logo: z.string().optional().nullable(),
+    primaryColor : z.string().min(1, "El color es obligatorio"),
+    secundaryColor : z.string().min(1, "El color es obligatorio"),
+
     // Por ahora los dejamos muy flex, luego los afinamos
     company: z
         .object({
-        name: z.string().optional(),
+        name: z.string().min(1, "El nombre es obligatorio"),
         address: z.string().optional(),
         city: z.string().optional(),
         fiscal_number: z.string().optional(),
@@ -41,6 +44,7 @@ export const quotationSchema = z.object({
         phone: z.string().optional(),
         })
         .optional(),
+    code : z.string().min(1, "El codigo de pais es obligatorio"),
 
     client: z
         .object({
