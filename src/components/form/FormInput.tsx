@@ -10,9 +10,10 @@ interface Props {
     name : string;
     placeholder ?: string;
     className ?: string;
+    required ?: boolean;
 }
 
-export function FormInput({type= 'text', label, control, name, placeholder='', className}:Props){
+export function FormInput({type= 'text', label, control, name, placeholder='', className, required = false}:Props){
 
     return (
         <Controller
@@ -20,13 +21,14 @@ export function FormInput({type= 'text', label, control, name, placeholder='', c
             control={control}
             render={({field, fieldState}) => (
                 <Field data-invalid={fieldState.invalid} className={className}>
-                    <FieldLabel htmlFor={name}>{label}</FieldLabel>
+                    <FieldLabel htmlFor={name}>{label} {required && <span className="text-destructive">*</span>} </FieldLabel>
                     <Input 
                         {...field} 
                         type={type} 
                         placeholder={placeholder}
                         aria-invalid={fieldState.invalid}
                         id={name}
+                        required={required}
                     />
                     {fieldState.error && (
                         <FieldError errors={[fieldState.error]}/>
