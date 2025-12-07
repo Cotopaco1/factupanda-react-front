@@ -3,7 +3,6 @@ import type { LoginForm } from "@/schemas/login"
 import type { UserType } from "@/types/users"
 
 export const useUserService = () => {
-    // const {apiClient} = useApiClient();
 
     const login = (data : LoginForm) => {
         return apiClient.post("/stateless/login", data)
