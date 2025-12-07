@@ -101,7 +101,7 @@ function RouteComponent() {
     });
   }, []);
 
-  /* Limpiar URL hacia el object. */
+  /* Limpiar URL hacia el object. watch() */
   useEffect(()=>{
     if(!pdfOpen && pdfUrl) URL.revokeObjectURL(pdfUrl)
   }, [pdfOpen])
