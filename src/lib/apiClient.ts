@@ -2,7 +2,10 @@ import axios, { AxiosError } from "axios";
 
 export const apiClient = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
-  withCredentials : true
+  withCredentials : true,
+  headers : {
+    "Accept-Language" : 'es'
+  }
 });
 apiClient.defaults.xsrfCookieName = "XSRF-TOKEN";
 apiClient.defaults.xsrfHeaderName = "X-XSRF-TOKEN";
