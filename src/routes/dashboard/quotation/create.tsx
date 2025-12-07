@@ -5,7 +5,7 @@ import { useForm, type SubmitHandler, useFieldArray } from "react-hook-form"
 import { useEffect, useState } from 'react'
 import { useQuotationService } from '@/services/quotationService';
 import type { QuotationForm, DueDates } from '@/types/quotation'
-import { FieldSet, FieldLegend, FieldGroup, FieldContent } from "@/components/ui/field"
+import { FieldSet, FieldLegend, FieldGroup, FieldContent, FieldLabel, FieldError } from "@/components/ui/field"
 import { FormInput } from '@/components/form/FormInput'
 import { FormSelect } from '@/components/form/FormSelect'
 import { CompanyOrCustomerFormField } from '@/components/quotation/CompanyOrCustomerFormFields'
@@ -14,6 +14,10 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { quotationSchema } from '@/schemas/quotation'
 import { ProductsTable } from '@/components/quotation/ProductsTable'
 import { PlusIcon } from 'lucide-react'
+import { DialogProductForm } from '@/components/products/DialogProductForm'
+import { FormUploadInput } from '@/components/form/FormUploadInput'
+import { FormColorInput } from '@/components/form/FormColorInput'
+import { DialogPdfQuotation } from '@/components/quotation/DialogPdfQuotation'
 
 export const Route = createFileRoute('/dashboard/quotation/create')({
   component: RouteComponent,
@@ -45,7 +49,11 @@ function RouteComponent() {
           email: "",
           phone: "",
         },
-        products : []
+        products : [],
+        temporary_logo : '',
+        primaryColor : '#3ab8eb',
+        secundaryColor : '#3ab8eb',
+        code : 'en-US'
       },
       resolver : zodResolver(quotationSchema)
   });
@@ -55,43 +63,54 @@ function RouteComponent() {
     name : 'products'
   });
   
+  const [pdfOpen, setPdfOpen] = useState(false);
+  const [pdfUrl , setPdfUrl] = useState('');
   const {createQuotation, getDueDates} = useQuotationService();
   const [dueDates, setDueDates] = useState<DueDates[]|[]>([]);
-  console.log("Imprimiendo Fields de Products : ", fields)
+  const [dialogOpen, setDialogOpen] = useState(false);
   const onSubmit = (data : FormValues) => {
-    console.log("Imprimiendo Fields de Products : ", fields)
     console.log(data);
     createQuotation(data)
-    .catch(() => {
-      form.setError('number', { type: 'manual', message: 'Esto es un error de testing' });
-    });
-  }
-  const handleAddProduct = () => {
-    append({
-      name : '',
-      quantity : 1,
-      unit : '',
-      unit_of_measurement : 'und',
-      unit_price : 1,
-      description : '',
-      discount_percentage : 0,
-      tax_percentage : 0
+    .then((file) => {
+      setPdfUrl(URL.createObjectURL(file))
+      setPdfOpen(true);
+    })
+    .catch((error) => {
+       const backendErrors = error.backendErrors as Record<string, string[]> | undefined
+      if(!backendErrors){
+        return;
+      }
+      Object.entries(backendErrors).forEach(([field, messages]) => {
+        // Laravel manda array de strings: usamos la primera o las unimos
+        const message = messages.join('\n')
+
+        form.setError(field as any, {
+          type: 'server',
+          message,
+        })
+      })
+
     });
   }
   const handleDeleteProduct = (index : number) => {
       remove(index);
   }
-
   useEffect(() => {
     getDueDates().then((data) => {
-      console.log("Data de getDuedDate desde useEffect: ", data);
       if(data) setDueDates(data);
-      
     });
   }, []);
 
+  /* Limpiar URL hacia el object. */
+  useEffect(()=>{
+    if(!pdfOpen && pdfUrl) URL.revokeObjectURL(pdfUrl)
+  }, [pdfOpen])
+
   return (
     <div>
+      <DialogPdfQuotation open={pdfOpen} setOpen={setPdfOpen} url={pdfUrl}/>
+      {/* Dialog Product */}
+      <DialogProductForm cbAdd={append} open={dialogOpen} setOpen={setDialogOpen}/>
      {/* Card con la info  */}
       <Card className='w-full'>
         <CardHeader>
@@ -137,10 +156,18 @@ function RouteComponent() {
 
               <FieldSet>
                 <FieldLegend>Personalización</FieldLegend>
-                <FieldGroup>
+                <FieldGroup className='grid md:grid-cols-2'>
                     {/* FormUploadImage */}
-
+                    <FormUploadInput control={form.control} label='Logo de la empresa' name='temporary_logo'/>
                     {/* FormColorPicker */}
+                    <div>
+                      <FieldLabel className='mb-3'>Colores</FieldLabel>
+                      <div className='flex flex-col md:flex-row gap-4'>
+                        <FormColorInput control={form.control} label="Principal" name="primaryColor" />
+                        <FormColorInput control={form.control} label="Secundario" name="secundaryColor" />
+
+                      </div>
+                    </div>
                 </FieldGroup>
               </FieldSet>
 
@@ -159,8 +186,11 @@ function RouteComponent() {
               </FieldSet>
               <FieldSet>
                 <FieldLegend>Productos</FieldLegend>
+                {form.formState.errors.products && (
+                  <FieldError errors={[form.formState.errors.products]}/>
+                )}
                 <div>
-                  <Button type='button' onClick={handleAddProduct}>
+                  <Button type='button' onClick={() => setDialogOpen(true)}>
                     <PlusIcon/> Agregar
                   </Button>
                 </div>
@@ -175,17 +205,6 @@ function RouteComponent() {
           </form>
         </CardContent>
       </Card>
-      {/*  Quotation Details  */}
-
-       {/* Quotation Custom */} 
-
-      {/* Company details  */} 
-
-       {/* Client Details  */}
-
-      {/* Products  */}
-
-      {/* Extra Information  */}
     </div>
   )
 }
