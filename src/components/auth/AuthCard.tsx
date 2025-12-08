@@ -19,6 +19,9 @@ import type { LoginForm } from "@/schemas/login";
 import { useUserService } from "@/services/userService";
 import { FieldError } from "../ui/field";
 import { useUserStore } from "@/stores/userStore";
+import { Spinner } from "../ui/spinner";
+import { toast } from "sonner";
+import { MergeServerErrorsToForm } from "@/services/errorService";
 
 interface Props {
     onLogin : CallableFunction
@@ -26,7 +29,7 @@ interface Props {
 
 export function AuthCard({onLogin}:Props) {
 
-    const { login } = useUserService();
+    const { login, loading } = useUserService();
     const setUser = useUserStore((state) => state.setUser);
     const setIsLogin = useUserStore((state) => state.setIsLogin);
     const setToken = useUserStore((state) => state.setToken);
@@ -44,9 +47,11 @@ export function AuthCard({onLogin}:Props) {
                 setToken(data.token);
                 onLogin();
                 localStorage.setItem('tkn', data.token);
+                toast.success("Inicio de sesión exitoso");
             })
-            .catch(()=>{
-
+            .catch((error)=>{
+                MergeServerErrorsToForm(error, form);
+                console.log("Error root despues de MergeServerErrorsToForm: ", form.formState.errors?.root);
             })
     }
 
@@ -69,11 +74,11 @@ export function AuthCard({onLogin}:Props) {
                             <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-6">
                                 <FormInput name="email" control={form.control} label="Correo Electronico" type="email" placeholder="correo@ejemplo.com" required />
                                 <FormInput name="password" control={form.control} label="Contraseña" type="password" placeholder="********" required />
-                                {form.formState.errors?.message && (
-                                    <FieldError errors={form.formState.errors?.message}/>
+                                {form.formState.errors?.root && (
+                                    <FieldError errors={[form.formState.errors?.root]}/>
                                 ) }
                                 <div className="mt-4">
-                                    <Button>Iniciar Sesión</Button>
+                                    <Button disabled={loading}> {loading && <Spinner/>} Iniciar Sesión</Button>
                                 </div>
                             </form>
                         </CardContent>
