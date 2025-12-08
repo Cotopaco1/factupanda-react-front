@@ -5,6 +5,7 @@ import { useUserStore } from '@/stores/userStore'
 import { useEffect, useState } from 'react'
 import { useUserService } from '@/services/userService'
 import { DialogLoading } from '@/components/DialogLoading'
+import { Toaster } from "@/components/ui/sonner"
 
 export const Route = createFileRoute('/dashboard')({
   component: RouteComponent,
@@ -15,11 +16,9 @@ function RouteComponent() {
   const setUser = useUserStore((state)=> state.setUser);
   const setToken = useUserStore((state)=> state.setToken);
   const setIsLogin = useUserStore((state)=> state.setIsLogin);
-  const {getUser} = useUserService();
-  const [loading, setLoading ] = useState(false);
+  const {getUser, loading} = useUserService();
   
   useEffect(() => {
-    setLoading(true);
     const token = localStorage.getItem('tkn');
     if(user === undefined && token){
       getUser()
@@ -29,7 +28,6 @@ function RouteComponent() {
         setToken(token);
       })
       .catch(()=>console.log("User is not authenticated"))
-      .finally(()=>setLoading(false))
     }
   }, []);
 
@@ -40,6 +38,7 @@ function RouteComponent() {
         <DialogLoading/>
       )}
       <main className='p-4 w-full'>
+        <Toaster richColors position='top-center'/>
         <SidebarTrigger />
         <Outlet/>
       </main>
