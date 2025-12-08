@@ -17,9 +17,6 @@ import {
 import { Link } from "@tanstack/react-router";
 import { useUserStore } from "@/stores/userStore";
 import { AuthDialog } from "./auth/AuthDialog";
-import { Avatar, AvatarImage } from "./ui/avatar";
-import PandaAvatar from "@/assets/avatar-panda.png";
-import { AvatarFallback } from "@radix-ui/react-avatar";
 import { SidebarProfileCard } from "./sidebar-profile-card";
 
 
