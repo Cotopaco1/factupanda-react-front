@@ -1,4 +1,4 @@
-import { Home, HomeIcon } from "lucide-react"
+import { HomeIcon } from "lucide-react"
 import LogoFactupanda from "@/assets/factupanda-logo-horizontal.svg"
 import {
   Sidebar,
@@ -11,16 +11,17 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarSeparator,
+  // SidebarSeparator,
 
 } from "@/components/ui/sidebar"
 import { Link } from "@tanstack/react-router";
 import { useUserStore } from "@/stores/userStore";
-import { Button } from "./ui/button";
 import { AuthDialog } from "./auth/AuthDialog";
 import { Avatar, AvatarImage } from "./ui/avatar";
 import PandaAvatar from "@/assets/avatar-panda.png";
 import { AvatarFallback } from "@radix-ui/react-avatar";
+import { SidebarProfileCard } from "./sidebar-profile-card";
+
 
 export function AppSidebar() {
   const isLogin = useUserStore((state) => state.isLogin);
@@ -66,17 +67,8 @@ export function AppSidebar() {
                   )}
                 {/* Si esta logueado entonces ... */}
                 {isLogin && (
-                <SidebarMenuItem className="flex gap-4">
-                    {/* Avatar */}
-                      <Avatar>
-                        <AvatarImage src={PandaAvatar} />
-                        <AvatarFallback>CN</AvatarFallback>
-                      </Avatar>
-                      {/* User Info */}
-                      <div className="flex flex-col">
-                        <strong className="text-sm">{user?.name}</strong>
-                        <p className="text-xs">{user?.email}</p>
-                      </div>
+                <SidebarMenuItem >
+                    <SidebarProfileCard />
                 </SidebarMenuItem>
                 )}
                 
