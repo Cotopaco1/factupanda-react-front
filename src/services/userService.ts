@@ -14,10 +14,17 @@ export const useUserService = () => {
         })
     }
 
+    const logout = () => {
+        return apiClient.post("/stateless/logout")
+        .then((response)=>{
+            return response.data;
+        })
+    }
+
     const getUser = () => {
         return apiClient.get('user')
             .then((response)=> response.data as {user : UserType} )
     }
 
-    return {login, getUser}
+    return {login, getUser, logout}
 }
