@@ -5,7 +5,6 @@ import { useUserStore } from '@/stores/userStore'
 import { useEffect, useState } from 'react'
 import { useUserService } from '@/services/userService'
 import { DialogLoading } from '@/components/DialogLoading'
-import { Toaster } from "@/components/ui/sonner"
 
 export const Route = createFileRoute('/dashboard')({
   component: RouteComponent,
@@ -38,7 +37,6 @@ function RouteComponent() {
         <DialogLoading/>
       )}
       <main className='p-4 w-full'>
-        <Toaster richColors position='top-center'/>
         <SidebarTrigger />
         <Outlet/>
       </main>
