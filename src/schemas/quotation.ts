@@ -59,4 +59,6 @@ export const quotationSchema = z.object({
     products: z
         .array(productSchema)
         .min(1, "Debes agregar al menos un producto"),
+    notes : z.string().optional(),
+    terms : z.string().optional(),
 })
