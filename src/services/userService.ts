@@ -28,6 +28,28 @@ export const useUserService = () => {
       return new Promise(resolve => setTimeout(resolve, ms));
     }
 
+    const register = (data) => {
+        setLoading(true);
+        return apiClient.post("/register", data)
+            .then((response)=> response.data as {message:string, data: {tenant_id : number, user: UserType}})
+            .finally(()=>setLoading(false))
+    }
+
+    const resetPassword = (data) => {
+        setLoading(true);
+        return apiClient.post("/stateless/set-password", data)
+            .then(response=> response.data as {message : string, user : UserType, tkn : string})
+            .finally(()=>setLoading(false))
+    }
+
+    
+    const forgotPassword = (data) => {
+        setLoading(true);
+        return apiClient.post("/forgot-password", data)
+            .then(response=> response.data as {message : string, user : UserType, tkn : string})
+            .finally(()=>setLoading(false))
+    }
+
     const getUser = async () => {
         setLoading(true);
         return apiClient.get('user')
@@ -35,5 +57,5 @@ export const useUserService = () => {
             .finally(()=>setLoading(false))
     }
 
-    return {login, getUser, logout, loading}
+    return {login, getUser, logout, loading, register, resetPassword, forgotPassword}
 }
