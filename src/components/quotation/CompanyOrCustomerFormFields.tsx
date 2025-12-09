@@ -4,7 +4,7 @@ import { FormInput } from "../form/FormInput";
 
 interface Props {
     suffix : string;
-    control : Control;
+    control : Control<any>;
 }
 
 export function CompanyOrCustomerFormField({suffix, control}:Props){

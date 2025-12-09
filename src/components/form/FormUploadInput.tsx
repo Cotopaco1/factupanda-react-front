@@ -3,11 +3,11 @@ import { Controller, type Control } from "react-hook-form";
 import { Button } from "../ui/button";
 import { UploadIcon, XIcon } from "lucide-react";
 import { Field, FieldError, FieldLabel } from "../ui/field";
-import { useRef, useState, type ChangeEvent, type ChangeEventHandler } from "react";
+import { useRef, useState, type ChangeEvent } from "react";
 import type { AxiosError } from "axios";
 interface Props {
     name : string;
-    control : Control;
+    control : Control<any>;
     label : string;
 }
 

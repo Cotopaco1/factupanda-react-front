@@ -18,6 +18,7 @@ import { DialogProductForm } from '@/components/products/DialogProductForm'
 import { FormUploadInput } from '@/components/form/FormUploadInput'
 import { FormColorInput } from '@/components/form/FormColorInput'
 import { DialogPdfQuotation } from '@/components/quotation/DialogPdfQuotation'
+import { FormTextarea } from '@/components/form/FormTextarea'
 
 export const Route = createFileRoute('/dashboard/quotation/create')({
   component: RouteComponent,
@@ -53,7 +54,9 @@ function RouteComponent() {
         temporary_logo : '',
         primaryColor : '#3ab8eb',
         secundaryColor : '#3ab8eb',
-        code : 'en-US'
+        code : 'en-US',
+        notes : '',
+        terms : ''
       },
       resolver : zodResolver(quotationSchema)
   });
@@ -201,7 +204,17 @@ function RouteComponent() {
                 </FieldGroup>
               </FieldSet>
 
-            <Button type='submit'>Hola ! esto es un boton desde Quotation Create</Button>
+              <FieldSet>
+                <FieldLegend>Información extra</FieldLegend>
+                <FieldGroup>
+                  <FieldContent className='grid md:grid-cols-2 gap-4'>
+                    <FormTextarea control={form.control} name='notes' label='Notas' placeholder='El envío corre por cuenta del cliente'/>
+                    <FormTextarea control={form.control} name='terms' label='Terminos y condiciones' placeholder='Enviar el pago a la cuenta #221332123'/>
+                  </FieldContent>
+                </FieldGroup>
+              </FieldSet>
+
+            <Button type='submit'>Generar cotización</Button>
           </form>
         </CardContent>
       </Card>
