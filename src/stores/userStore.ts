@@ -9,6 +9,7 @@ type UserStoreState = {
   token : string|undefined;
   setToken : (token : string) => void;
   logoutUser : () => void;
+  loginUser : (token : string, user : UserType) => void;
 }
 
 
@@ -22,5 +23,9 @@ export const useUserStore = create<UserStoreState>((set) => ({
     logoutUser : () => {
       set({token : '', user : undefined, isLogin : false});
       localStorage.removeItem('tkn');
+    },
+    loginUser : (token , user ) => {
+      set({token : token, user : user, isLogin : true});
+      localStorage.setItem('tkn', token);
     }
 }));
