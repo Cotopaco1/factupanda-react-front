@@ -39,8 +39,10 @@
   --sidebar-ring: oklch(0.708 0 0);
 
   /* Custom */
-  --success : oklch(84.1% 0.238 128.85);
-  --success-foreground : oklch(98.6% 0.031 120.757);
+  --success : oklch(98.6% 0.031 120.757);
+  --success-foreground : oklch(76.8% 0.233 130.85);
+  --warning : oklch(98.7% 0.026 102.212);
+  --warning-foreground: oklch(79.5% 0.184 86.047);
 
 
 }
@@ -121,6 +123,12 @@
     /* Custom */
   --color-success : var(--success);
   --color-success-foreground : var(--success-foreground);
+  --color-warning : var(--warning);
+  --color-warning-foreground : var(--warning-foreground);
+}
+
+@utility link-text {
+  @apply text-sm text-blue-400 underline hover:no-underline;
 }
 
 @layer base {
