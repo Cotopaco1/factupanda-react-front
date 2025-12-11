@@ -7,4 +7,5 @@ export interface UserType {
     updated_at : string;
     tenant_id : number;
     is_admin : boolean | null;
+    password_setup : boolean;
 }

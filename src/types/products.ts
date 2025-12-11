@@ -1,4 +1,4 @@
-interface Products {
+interface Product {
     id : string,
     name : string,
     description : string,
@@ -11,6 +11,5 @@ interface Products {
     tax_percentage : number
 }
 
-type ProductsForm = Partial<Products>;
-
-export type {Products, ProductsForm};
+type ProductsForm = Partial<Product>;
+export type {Product, ProductsForm};
