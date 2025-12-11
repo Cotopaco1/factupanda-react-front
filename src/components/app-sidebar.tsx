@@ -1,4 +1,4 @@
-import { HomeIcon } from "lucide-react"
+import { HomeIcon, PackageIcon, type LucideIcon } from "lucide-react"
 import LogoFactupanda from "@/assets/factupanda-logo-horizontal.svg"
 import {
   Sidebar,
@@ -19,17 +19,59 @@ import { useUserStore } from "@/stores/userStore";
 import { AuthDialog } from "./auth/AuthDialog";
 import { SidebarProfileCard } from "./sidebar-profile-card";
 
+type SidebarItem = {
+  label: string
+  link: string
+  status: boolean
+  auth: boolean
+  icon: LucideIcon
+}
+
+const items: SidebarItem[] = [
+  {
+    label: "Cotización",
+    link: "/dashboard/quotation/create",
+    status: true,
+    auth: true,
+    icon: HomeIcon,
+  },
+  {
+    label: "Productos",
+    link: "/dashboard/products",
+    status: true,
+    auth: true,
+    icon: PackageIcon,
+  },
+]
+
+
+type AppSidebarItemProps = {
+  item: SidebarItem
+}
+
+function AppSidebarItem({ item }: AppSidebarItemProps) {
+  const Icon = item.icon
+
+  return (
+    <SidebarMenuItem>
+      <SidebarMenuButton asChild>
+        <Link
+          to={item.link}
+          activeProps={{ className: "bg-secondary flex items-center gap-2" }}
+          activeOptions={{ exact: true }}
+        >
+          <Icon className="h-4 w-4" />
+          <span>{item.label}</span>
+        </Link>
+      </SidebarMenuButton>
+    </SidebarMenuItem>
+  )
+}
+
 
 export function AppSidebar() {
   const isLogin = useUserStore((state) => state.isLogin);
-  const user = useUserStore((state) => state.user);
-  const items = [
-    {
-      label: "Cotización",
-      link: "/dashboard/quotation/create",
-      status: true
-    }
-  ];
+  // const user = useUserStore((state) => state.user);
 
   return (
     <Sidebar>
@@ -42,14 +84,7 @@ export function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               {items.map(item => (
-                <SidebarMenuItem key={item.link}>
-                  <SidebarMenuButton  asChild >
-                    <Link to={item.link} activeProps={{ className: "bg-secondary  flex items-center gap-2" }} activeOptions={{ exact: true }}>
-                      <HomeIcon/>
-                      {item.label}
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
+                <AppSidebarItem key={item.link} item={item} />
               ))}
             </SidebarMenu>
           </SidebarGroupContent>
