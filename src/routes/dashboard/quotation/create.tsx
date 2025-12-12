@@ -21,6 +21,8 @@ import { DialogPdfQuotation } from '@/components/quotation/DialogPdfQuotation'
 import { FormTextarea } from '@/components/form/FormTextarea'
 import { ProductSearchInput } from '@/components/products/ProductsSearchInput'
 import { useUserStore } from '@/stores/userStore'
+import { DialogQuantity } from '@/components/quotation/DialogQuantity'
+import type { Product } from '@/types/products'
 
 export const Route = createFileRoute('/dashboard/quotation/create')({
   component: RouteComponent,
@@ -70,6 +72,8 @@ function RouteComponent() {
   
   const [pdfOpen, setPdfOpen] = useState(false);
   const [pdfUrl , setPdfUrl] = useState('');
+  const [dialogQuantityOpen, setDialogQuantityOpen] = useState(false);
+  const [cbDialogQuantity, setCbDialogQuantity] = useState<(number : number)=>any>(()=>null)
   const {createQuotation, getDueDates} = useQuotationService();
   const [dueDates, setDueDates] = useState<DueDates[]|[]>([]);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -101,6 +105,16 @@ function RouteComponent() {
   const handleDeleteProduct = (index : number) => {
       remove(index);
   }
+
+  const cbProductSearch = (product : Product) => {
+
+    setCbDialogQuantity(()=>{
+      return (number : number)=>append({...product, quantity : number});
+    })
+    setDialogQuantityOpen(true);
+
+  }
+
   useEffect(() => {
     getDueDates().then((data) => {
       if(data) setDueDates(data);
@@ -112,8 +126,10 @@ function RouteComponent() {
     if(!pdfOpen && pdfUrl) URL.revokeObjectURL(pdfUrl)
   }, [pdfOpen])
 
+
   return (
     <div>
+      <DialogQuantity open={dialogQuantityOpen} setOpen={setDialogQuantityOpen} cb={cbDialogQuantity} />
       <DialogPdfQuotation open={pdfOpen} setOpen={setPdfOpen} url={pdfUrl}/>
       {/* Dialog Product */}
       <DialogProductForm cbAdd={append} open={dialogOpen} setOpen={setDialogOpen}/>
@@ -204,7 +220,7 @@ function RouteComponent() {
                   </div>
                   {isLogin && (
                     <div>
-                      <ProductSearchInput cbSelected={(product)=> append(product)}/>
+                      <ProductSearchInput cbSelected={cbProductSearch}/>
                     </div>
                   )}
                 </div>
