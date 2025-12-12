@@ -1,10 +1,10 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { Button } from '../../../components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { useForm, type SubmitHandler, useFieldArray } from "react-hook-form"
+import { useForm, useFieldArray } from "react-hook-form"
 import { useEffect, useState } from 'react'
 import { useQuotationService } from '@/services/quotationService';
-import type { QuotationForm, DueDates } from '@/types/quotation'
+import type { DueDates } from '@/types/quotation'
 import { FieldSet, FieldLegend, FieldGroup, FieldContent, FieldLabel, FieldError } from "@/components/ui/field"
 import { FormInput } from '@/components/form/FormInput'
 import { FormSelect } from '@/components/form/FormSelect'
@@ -19,6 +19,8 @@ import { FormUploadInput } from '@/components/form/FormUploadInput'
 import { FormColorInput } from '@/components/form/FormColorInput'
 import { DialogPdfQuotation } from '@/components/quotation/DialogPdfQuotation'
 import { FormTextarea } from '@/components/form/FormTextarea'
+import { ProductSearchInput } from '@/components/products/ProductsSearchInput'
+import { useUserStore } from '@/stores/userStore'
 
 export const Route = createFileRoute('/dashboard/quotation/create')({
   component: RouteComponent,
@@ -71,6 +73,7 @@ function RouteComponent() {
   const {createQuotation, getDueDates} = useQuotationService();
   const [dueDates, setDueDates] = useState<DueDates[]|[]>([]);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const isLogin = useUserStore(state => state.isLogin);
   const onSubmit = (data : FormValues) => {
     console.log(data);
     createQuotation(data)
@@ -187,15 +190,23 @@ function RouteComponent() {
                   <CompanyOrCustomerFormField control={form.control} suffix='client' />
                 </FieldGroup>
               </FieldSet>
+              {/* Products Table */}
               <FieldSet>
                 <FieldLegend>Productos</FieldLegend>
                 {form.formState.errors.products && (
                   <FieldError errors={[form.formState.errors.products]}/>
                 )}
-                <div>
-                  <Button type='button' onClick={() => setDialogOpen(true)}>
-                    <PlusIcon/> Agregar
-                  </Button>
+                <div className='flex flex-col gap-2'>
+                  <div>
+                    <Button size="sm" type='button' onClick={() => setDialogOpen(true)}>
+                      <PlusIcon/> Agregar nuevo producto
+                    </Button>
+                  </div>
+                  {isLogin && (
+                    <div>
+                      <ProductSearchInput cbSelected={(product)=> append(product)}/>
+                    </div>
+                  )}
                 </div>
                 <FieldGroup>
                   <FieldContent>

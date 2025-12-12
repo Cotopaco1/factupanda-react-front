@@ -34,6 +34,7 @@ export const useProductService = () => {
         name?: string;
     }
 
+    /**  Retreive products with pagination */
     const list = (url : string|null = null, filters: ProductsListFilters = {}) => {
         const finalUrl = url ? url : '/products';
         return handleFetch(async () => {
@@ -44,5 +45,17 @@ export const useProductService = () => {
         });
     }
 
-    return { create, loading, list }
+    /** Retreive products based on query string */
+    const searchProducts = (query : string) => {
+
+        return handleFetch(async () => {
+            const response = await apiClient.get<
+            ApiResponse<{data : Product[]}>
+            >("/search/products", { params: {query : query} })
+            return response.data
+        });
+    }
+    
+
+    return { create, loading, list, searchProducts }
 }
