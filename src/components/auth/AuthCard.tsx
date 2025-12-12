@@ -23,6 +23,7 @@ import { toast } from "sonner";
 import { MergeServerErrorsToForm } from "@/services/errorService";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { RegisterCard } from "./RegisterCard";
+import { Link } from "@tanstack/react-router";
 
 interface Props {
     onLogin : CallableFunction
@@ -81,8 +82,9 @@ export function AuthCard({onLogin}:Props) {
                                 {form.formState.errors?.root && (
                                     <FieldError errors={[form.formState.errors?.root]}/>
                                 )}
-                                <div className="mt-4">
+                                <div className="mt-4 grid gap-4">
                                     <Button disabled={loading}> {loading && <Spinner/>} Iniciar Sesión</Button>
+                                    <Link className="link-text" to="/olvide-password">¿Olvidaste la contraseña? Click Aqui</Link>
                                 </div>
                             </form>
                         </CardContent>

@@ -16,10 +16,15 @@ import { FormRootErrorMessage } from "../form/FormRootErrorMessage";
 import { ButtonLoader } from "../ButtonLoader";
 import { useState } from "react";
 import { CheckIcon } from "lucide-react";
+import { useUserStore } from "@/stores/userStore";
+import { useAuthDialogStore } from "@/stores/authDialog";
+import { toast } from "sonner";
 
 
 export function RegisterCard() {
     const {register, loading} = useUserService();
+    const setAuthdialogOpen = useAuthDialogStore(state=>state.setIsOpen);
+    const loginUser = useUserStore(state=>state.loginUser);
     const [registerSucces, setRegisterSucces] = useState(false);
     const [successMessage, setSuccessMessage] = useState('');
     const form = useForm<RegisterForm>({
@@ -34,7 +39,11 @@ export function RegisterCard() {
         register(data)
         .then((data)=>{
             setRegisterSucces(true);
-            setSuccessMessage(data.message);
+            // setSuccessMessage();
+            toast.success(data.message);
+            loginUser(data.data.token, data.data.user)
+            setAuthdialogOpen(false);
+
         }).catch((error)=>{
             MergeServerErrorsToForm(error, form);
         })
@@ -67,7 +76,7 @@ export function RegisterCard() {
                         <CardTitle>Revisa tu correo electronico</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <p ><CheckIcon className="bg-success text-success-foreground rounded-full inline mr-2 p-1" />{successMessage}</p>
+                        <p ><CheckIcon className="bg-success text-success-foreground rounded-full inline mr-2 p-1" />Te has registrado correctamente, hemos enviado un correo electronico para configurar tu nueva contraseña, no olvides configurarla.</p>
                     </CardContent>
                 </Card>
             )}

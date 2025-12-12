@@ -8,9 +8,7 @@ const isValidationError = (response : AxiosError) => {
 }
 
 const ApplyServerErrorsToRHF = (backendErrors : LaravelErrors, form : UseFormReturn<any>) : void => {
-    console.log("Backend Errors:" , backendErrors)
     Object.entries(backendErrors).forEach(([field, messages]) => {
-        console.log("Dentro de Object Entierers: ", field, messages);
         // Laravel manda array de strings: usamos la primera o las unimos
         const message = messages.join('\n')
 
@@ -25,7 +23,6 @@ const ApplyServerErrorsToRHF = (backendErrors : LaravelErrors, form : UseFormRet
 export const MergeServerErrorsToForm = (error : AxiosError, form : UseFormReturn<any>) : void => {
 
     if(error.response?.data?.message){ // Add standard error message
-        console.log("Agregando error root...")
         form.setError('root', {
             type : 'server',
             message : error.response?.data?.message
@@ -33,7 +30,7 @@ export const MergeServerErrorsToForm = (error : AxiosError, form : UseFormReturn
     }
     
     if(!error.isAxiosError || !isValidationError(error)) return;
-    const errors : LaravelErrors = error.response?.data?.error ?? {};
+    const errors : LaravelErrors = error.response?.data?.errors ?? {};
 
     ApplyServerErrorsToRHF({...errors }, form);
 }

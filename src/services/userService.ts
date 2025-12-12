@@ -31,7 +31,7 @@ export const useUserService = () => {
     const register = (data) => {
         setLoading(true);
         return apiClient.post("/register", data)
-            .then((response)=> response.data as {message:string, data: {tenant_id : number, user: UserType}})
+            .then((response)=> response.data as {message:string, data: {tenant_id : number, user: UserType, token: string}})
             .finally(()=>setLoading(false))
     }
 
@@ -46,7 +46,7 @@ export const useUserService = () => {
     const forgotPassword = (data) => {
         setLoading(true);
         return apiClient.post("/forgot-password", data)
-            .then(response=> response.data as {message : string, user : UserType, tkn : string})
+            .then(response=> response.data as {message : string, email : string})
             .finally(()=>setLoading(false))
     }
 
