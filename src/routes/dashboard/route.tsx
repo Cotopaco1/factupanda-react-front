@@ -5,6 +5,7 @@ import { useUserStore } from '@/stores/userStore'
 import { useEffect, useState } from 'react'
 import { useUserService } from '@/services/userService'
 import { DialogLoading } from '@/components/DialogLoading'
+import { PasswordSetupAlertBanner } from '@/components/banners/PasswordSetupAlertBanner'
 
 export const Route = createFileRoute('/dashboard')({
   component: RouteComponent,
@@ -12,6 +13,7 @@ export const Route = createFileRoute('/dashboard')({
 
 function RouteComponent() {
   const user = useUserStore((state)=> state.user);
+  const isLogin = useUserStore((state)=> state.isLogin);
   const setUser = useUserStore((state)=> state.setUser);
   const setToken = useUserStore((state)=> state.setToken);
   const setIsLogin = useUserStore((state)=> state.setIsLogin);
@@ -33,6 +35,9 @@ function RouteComponent() {
   return (
     <SidebarProvider>
       <AppSidebar />
+      {isLogin && !user?.password_setup && (
+        <PasswordSetupAlertBanner/>
+      )}
       {loading && (
         <DialogLoading/>
       )}

@@ -182,7 +182,7 @@ function RouteComponent() {
               </FieldSet>
 
               <FieldSet>
-                <FieldLegend>Información de la Cliente</FieldLegend>
+                <FieldLegend>Información del Cliente</FieldLegend>
                 <FieldGroup>
                   <CompanyOrCustomerFormField control={form.control} suffix='client' />
                 </FieldGroup>
