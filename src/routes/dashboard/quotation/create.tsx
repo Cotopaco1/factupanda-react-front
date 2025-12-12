@@ -2,7 +2,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import { Button } from '../../../components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { useForm, useFieldArray } from "react-hook-form"
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useQuotationService } from '@/services/quotationService';
 import type { DueDates } from '@/types/quotation'
 import { FieldSet, FieldLegend, FieldGroup, FieldContent, FieldLabel, FieldError } from "@/components/ui/field"
@@ -23,29 +23,34 @@ import { ProductSearchInput } from '@/components/products/ProductsSearchInput'
 import { useUserStore } from '@/stores/userStore'
 import { DialogQuantity } from '@/components/quotation/DialogQuantity'
 import type { Product } from '@/types/products'
+import { ButtonLoader } from '@/components/ButtonLoader'
+
+type FormValues = z.infer<typeof quotationSchema>
 
 export const Route = createFileRoute('/dashboard/quotation/create')({
   component: RouteComponent,
 })
 
-type FormValues = z.infer<typeof quotationSchema>
+const retreiveCompanyData = () => {
+    const company = localStorage.getItem('quotation.company');
+    return company ?
+      JSON.parse(company) :
+      {name: "", address: "", city: "", fiscal_number: "", email: "", phone: ""}
+}
 
+const retreiveCustomizationSettings = () : {primaryColor : string, secundaryColor : string} => {
+  const customizationSettings = localStorage.getItem('quotation.customization');
+  return customizationSettings ?
+    JSON.parse(customizationSettings) :
+    { primaryColor : '#3ab8eb', secundaryColor : '#3ab8eb', }
+}
 
-function RouteComponent() {
-
-    const form = useForm<FormValues>({
-        defaultValues: {
+const retreiveQuotationDefaultValues = () : FormValues => {
+  return {
         number: "",
         date: "",
-        due_date_id: 0,       // como número inicial o "" si prefieres
-        company: {
-          name: "",
-          address: "",
-          city: "",
-          fiscal_number: "",
-          email: "",
-          phone: "",
-        },
+        due_date_id: 0,
+        company: retreiveCompanyData(),
         client: {
           name: "",
           address: "",
@@ -56,13 +61,22 @@ function RouteComponent() {
         },
         products : [],
         temporary_logo : '',
-        primaryColor : '#3ab8eb',
-        secundaryColor : '#3ab8eb',
         code : 'en-US',
         notes : '',
-        terms : ''
-      },
-      resolver : zodResolver(quotationSchema)
+        terms : '',
+        ... retreiveCustomizationSettings()
+  }
+}
+
+
+
+
+function RouteComponent() {
+
+  const defaultValues = useMemo(()=>retreiveQuotationDefaultValues(), []);
+  const form = useForm<FormValues>({
+      defaultValues: defaultValues,
+    resolver : zodResolver(quotationSchema)
   });
 
   const {fields, append,remove} = useFieldArray({
@@ -74,7 +88,7 @@ function RouteComponent() {
   const [pdfUrl , setPdfUrl] = useState('');
   const [dialogQuantityOpen, setDialogQuantityOpen] = useState(false);
   const [cbDialogQuantity, setCbDialogQuantity] = useState<(number : number)=>any>(()=>null)
-  const {createQuotation, getDueDates} = useQuotationService();
+  const {createQuotation, getDueDates , loading:quotationLoading} = useQuotationService();
   const [dueDates, setDueDates] = useState<DueDates[]|[]>([]);
   const [dialogOpen, setDialogOpen] = useState(false);
   const isLogin = useUserStore(state => state.isLogin);
@@ -84,6 +98,14 @@ function RouteComponent() {
     .then((file) => {
       setPdfUrl(URL.createObjectURL(file))
       setPdfOpen(true);
+      try{
+        localStorage.setItem('quotation.company', JSON.stringify(data.company))
+        localStorage.setItem('quotation.customization', JSON.stringify({primaryColor : data.primaryColor, secundaryColor : data.secundaryColor}))
+      }catch(error){
+        console.log("An error ocurred during saving default values",error )
+      }
+      // Save data in defaultValues
+      
     })
     .catch((error) => {
        const backendErrors = error.backendErrors as Record<string, string[]> | undefined
@@ -241,7 +263,7 @@ function RouteComponent() {
                 </FieldGroup>
               </FieldSet>
 
-            <Button type='submit'>Generar cotización</Button>
+            <ButtonLoader loading={quotationLoading} type='submit'>Generar cotización</ButtonLoader>
           </form>
         </CardContent>
       </Card>
