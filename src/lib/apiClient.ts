@@ -1,7 +1,12 @@
 import axios, { AxiosError } from "axios";
 import { useUserStore } from "@/stores/userStore";
+import { toast } from "sonner";
 
-
+declare module 'axios' {
+  export interface AxiosRequestConfig {
+    skipGlobalError?: boolean;
+  }
+}
 
 export const apiClient = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
@@ -52,3 +57,36 @@ apiClient.interceptors.request.use((config) => {
   }
   return config;
 });
+
+apiClient.interceptors.response.use(
+  (response) => response,
+  async (error: AxiosError) => {
+    const skipError = error.config?.skipGlobalError;
+    
+    if (skipError) {
+      return Promise.reject(error);
+    }
+
+    const status = error.response?.status;
+    let errorData = error.response?.data;
+
+    if (errorData instanceof Blob) {
+      try {
+        const text = await errorData.text();
+        errorData = JSON.parse(text);
+      } catch {
+        errorData = null;
+      }
+    }
+
+    const message = errorData?.message || 'Error Descnocido, intente nuevamente';
+
+    if (!status) {
+      toast.error('Error de red: No se pudo conectar al servidor');
+    } else if (status !== 422) {
+      toast.error(`Error ${status}: ${message}`);
+    }
+
+    return Promise.reject(error);
+  }
+);

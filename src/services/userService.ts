@@ -50,9 +50,11 @@ export const useUserService = () => {
             .finally(()=>setLoading(false))
     }
 
-    const getUser = async () => {
+    const getUser = async (skipGlobalError = true) => {
         setLoading(true);
-        return apiClient.get('user')
+        return apiClient.get('user', {
+            skipGlobalError: skipGlobalError
+        })
             .then((response)=> response.data as {user : UserType} )
             .finally(()=>setLoading(false))
     }
