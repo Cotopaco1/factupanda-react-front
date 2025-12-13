@@ -1,6 +1,6 @@
 import { ButtonLoader } from '@/components/ButtonLoader'
+import { DashboardLayout, type BreadcrumbItemType } from '@/components/layouts/DashboardLayout'
 import { ProductFormFields } from '@/components/products/ProductFormFields'
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import  { type ProductForm, productSchema } from '@/schemas/quotation'
 import { MergeServerErrorsToForm } from '@/services/errorService'
 import { useProductService } from '@/services/productService'
@@ -13,8 +13,19 @@ export const Route = createFileRoute('/dashboard/products/create')({
   component: RouteComponent,
 })
 
+const breadcrumb : BreadcrumbItemType[] = [
+    {
+        label : 'Productos',
+        to : '/dashboard/products'
+    },
+    {
+        label : 'Crear',
+        to : '/dashboard/products/create'
+    }
+]
+
 function RouteComponent() {
-    const {create} = useProductService();
+    const {create, loading} = useProductService();
     const form = useForm<ProductForm>({
         defaultValues : {
             description : '',
@@ -29,26 +40,23 @@ function RouteComponent() {
     });
     const onSubmit = (data) => {
         create(data).then(response => {
-            console.log(response.data.product);
+            form.reset();
             toast.success("Producto creado");
         }).catch(error => {
             MergeServerErrorsToForm(error, form);
         })
     }
   return (
-    <form onSubmit={form.handleSubmit(onSubmit)}>
-        <Card>
-            <CardHeader>
-                <CardTitle>Crear Producto</CardTitle>
-                <CardDescription>Crea un nuevo producto para buscarlo facilmente al generar la cotización</CardDescription>
-            </CardHeader>
-            <CardContent className='grid gap-4 md:grid-cols-2'>
+    <DashboardLayout title='Crear Producto' description='Crea un nuevo producto para buscarlo facilmente al generar la cotización.' breadcrumb={breadcrumb}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className='grid gap-4' >
+            <div className='grid md:grid-cols-2 gap-4'>
                 <ProductFormFields control={form.control}/>
-            </CardContent>
-            <CardFooter>
-                <ButtonLoader loading={false} >Crear</ButtonLoader>
-            </CardFooter>
-        </Card>        
-    </form>
+
+            </div>
+                <div>
+                    <ButtonLoader loading={loading} >Crear</ButtonLoader>
+                </div>    
+        </form>
+    </DashboardLayout>
   )
 }

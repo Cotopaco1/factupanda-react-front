@@ -1,3 +1,4 @@
+import { DashboardLayout, type BreadcrumbItemType } from '@/components/layouts/DashboardLayout';
 import { ProductsTable } from '@/components/products/ProductsTable'
 import { Button } from '@/components/ui/button';
 import { createFileRoute, Link } from '@tanstack/react-router'
@@ -18,26 +19,29 @@ export const Route = createFileRoute('/dashboard/products/')({
   }
 })
 
+const breadcrumb : BreadcrumbItemType[] = [
+  {
+    label : "Productos",
+    to : '.'
+  }
+];
+
 function RouteComponent() {
 
      const { page,  per_page } = Route.useSearch();
 
   return (
-    <div className='grid gap-10 p-4'>
-      <div className='my-6'>
-        <h1 className='text-xl md:text-2xl mb-2'>Productos</h1>
-        <p className='text-muted-foreground text-sm md:text-base'>Visualiza los productos que tienes creados</p>
-      </div>
-      <div>
+    <DashboardLayout title='Productos' description='Lista de productos' breadcrumb={breadcrumb}>
         <div>
-          <Link to='/dashboard/products/create'>
-            <Button> <PlusIcon/> Agregar Producto</Button>
-          </Link>
+          <div>
+            <Link to='/dashboard/products/create'>
+              <Button> <PlusIcon/> Agregar Producto</Button>
+            </Link>
+          </div>
+          {/* Tabla de productos... */}
+          <ProductsTable page={page} perPage={per_page} />
+          
         </div>
-        {/* Tabla de productos... */}
-        <ProductsTable page={page} perPage={per_page} />
-        
-      </div>
-    </div>
+    </DashboardLayout>
   )
 }
