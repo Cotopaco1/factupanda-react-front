@@ -32,7 +32,7 @@ const items: SidebarItem[] = [
     label: "Cotización",
     link: "/dashboard/quotation/create",
     status: true,
-    auth: true,
+    auth: false,
     icon: HomeIcon,
   },
   {
@@ -46,12 +46,12 @@ const items: SidebarItem[] = [
 
 
 type AppSidebarItemProps = {
-  item: SidebarItem
+  item: SidebarItem;
+  isLogin : boolean;
 }
 
-function AppSidebarItem({ item }: AppSidebarItemProps) {
+function AppSidebarItem({ item, isLogin }: AppSidebarItemProps) {
   const Icon = item.icon
-
   return (
     <SidebarMenuItem>
       <SidebarMenuButton asChild>
@@ -59,6 +59,7 @@ function AppSidebarItem({ item }: AppSidebarItemProps) {
           to={item.link}
           activeProps={{ className: "bg-secondary flex items-center gap-2" }}
           activeOptions={{ exact: true }}
+          disabled={item.auth && !isLogin}
         >
           <Icon className="h-4 w-4" />
           <span>{item.label}</span>
@@ -71,8 +72,6 @@ function AppSidebarItem({ item }: AppSidebarItemProps) {
 
 export function AppSidebar() {
   const isLogin = useUserStore((state) => state.isLogin);
-  // const user = useUserStore((state) => state.user);
-
   return (
     <Sidebar>
       <SidebarHeader>
@@ -84,8 +83,13 @@ export function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               {items.map(item => (
-                <AppSidebarItem key={item.link} item={item} />
+                <AppSidebarItem key={item.link} item={item} isLogin={isLogin} />
               ))}
+              {!isLogin && (
+                  <SidebarMenuItem className="bg-warning text-warning-foreground p-2 rounded-xl">
+                    Inicia sesión para acceder a todas las funcionalidades
+                  </SidebarMenuItem>
+                )}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
