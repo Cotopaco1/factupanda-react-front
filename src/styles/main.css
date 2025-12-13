@@ -43,6 +43,8 @@
   --success-foreground : oklch(76.8% 0.233 130.85);
   --warning : oklch(98.7% 0.026 102.212);
   --warning-foreground: oklch(79.5% 0.184 86.047);
+  --highlight : oklch(55.8% 0.288 302.321);
+  --highlight-foreground : oklch(97.7% 0.014 308.299);
 
 
 }
@@ -125,10 +127,16 @@
   --color-success-foreground : var(--success-foreground);
   --color-warning : var(--warning);
   --color-warning-foreground : var(--warning-foreground);
+  --color-highlight : var(--highlight);
+  --color-highlight-foreground : var(--highlight-foreground);
 }
 
 @utility link-text {
   @apply text-sm text-blue-400 underline hover:no-underline;
+}
+
+@utility container {
+  @apply mx-auto p-4;
 }
 
 @layer base {
