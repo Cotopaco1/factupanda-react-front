@@ -261,7 +261,9 @@ function RouteComponent() {
                 </FieldGroup>
               </FieldSet>
 
-            <ButtonLoader loading={quotationLoading} type='submit'>Generar cotización</ButtonLoader>
+            <div>
+              <ButtonLoader className='py-6' loading={quotationLoading} type='submit'>Generar cotización</ButtonLoader>
+            </div>
           </form>
         </CardContent>
       </Card>
