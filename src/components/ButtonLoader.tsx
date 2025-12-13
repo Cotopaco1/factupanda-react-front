@@ -6,7 +6,8 @@ interface Props {
     loading : boolean,
     children : React.ReactNode;
     type ?: "submit" | "button" | "reset" | undefined;
+    className ?: string;
 }
-export function ButtonLoader({loading, children, type='submit'}:Props){
-    return <Button type={type} disabled={loading}> {loading && <Spinner/>} {children}</Button>
+export function ButtonLoader({loading, children, type='submit', className}:Props){
+    return <Button className={className} type={type} disabled={loading}> {loading && <Spinner/>} {children}</Button>
 }
