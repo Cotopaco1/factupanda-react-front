@@ -64,7 +64,7 @@ function Index() {
             Personalizado con el logo de tu empresa, descuentos e impuestos disponibles. Descargala en formato PDF. y todo totalmente <span className='text-highlight font-bold'>GRATUITO!</span>
           </h2>
           <Button className='w-max p-6'>
-            <Link to='/dashboard/products/create'>Crear Cotización</Link>
+            <Link to='/dashboard/quotation/create'>Crear Cotización</Link>
           </Button>
         </div>
         {/* Second */}

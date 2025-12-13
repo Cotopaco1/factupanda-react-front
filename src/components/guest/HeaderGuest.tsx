@@ -18,11 +18,11 @@ type NavItem = {
 const NavList : NavItem[] = [
     {
         label : 'Crear Cotización',
-        to : '/dashboard/products/create'
+        to : '/dashboard/quotation/create'
     },
     {
         label : 'Dashboard',
-        to : '/dashboard/products/create'
+        to : '/dashboard/quotation/create'
     },
 ];
 
