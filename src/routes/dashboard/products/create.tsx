@@ -42,8 +42,8 @@ function RouteComponent() {
         create(data).then(response => {
             form.reset();
             toast.success("Producto creado");
-        }).catch(error => {
-            MergeServerErrorsToForm(error, form);
+        }).catch( async (error) => {
+            await MergeServerErrorsToForm(error, form);
         })
     }
   return (

@@ -2,16 +2,13 @@ import { createFileRoute } from '@tanstack/react-router'
 import { FormInput } from '@/components/form/FormInput'
 import { AuthLayout } from '@/components/layouts/AuthLayout'
 import { useForm } from 'react-hook-form'
-import { type forgotPasswordForm, forgotPasswordSchema, type ResetPasswordForm, resetPasswordSchema } from '@/schemas/auth'
+import { type forgotPasswordForm, forgotPasswordSchema } from '@/schemas/auth'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { ButtonLoader } from '@/components/ButtonLoader'
 import { useUserService } from '@/services/userService'
 import { MergeServerErrorsToForm } from '@/services/errorService'
 import { FormRootErrorMessage } from '@/components/form/FormRootErrorMessage'
-import { toast } from 'sonner'
-import { useUserStore } from '@/stores/userStore'
-import { useNavigate } from '@tanstack/react-router'
-import { CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { CardDescription, CardTitle } from '@/components/ui/card'
 import { useState } from 'react'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { CheckIcon } from 'lucide-react'
@@ -33,8 +30,8 @@ function RouteComponent() {
     forgotPassword(data)
       .then((data)=>{
         setMessage(`Correo enviado a ${data.email}`)
-      }).catch((error)=>{
-        MergeServerErrorsToForm(error,form)
+      }).catch(async(error)=>{
+        await MergeServerErrorsToForm(error,form)
       })
   }
   const header = (

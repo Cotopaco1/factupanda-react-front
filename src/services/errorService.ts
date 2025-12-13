@@ -2,14 +2,12 @@ import type { LaravelErrors } from "@/types/errors";
 import type { AxiosError } from "axios";
 import type { UseFormReturn } from "react-hook-form";
 
-const isValidationError = (response : AxiosError) => {
-    const status = response.status || 500;
-    return status == 422;
+const isValidationError = (status?: number) => {
+    return status === 422;
 }
 
 const ApplyServerErrorsToRHF = (backendErrors : LaravelErrors, form : UseFormReturn<any>) : void => {
     Object.entries(backendErrors).forEach(([field, messages]) => {
-        // Laravel manda array de strings: usamos la primera o las unimos
         const message = messages.join('\n')
 
         form.setError(field as any, {
@@ -17,20 +15,33 @@ const ApplyServerErrorsToRHF = (backendErrors : LaravelErrors, form : UseFormRet
             message,
         })
     })
-
 }
-/* TODO: Crear un custom hook parap oder utilziar esta funcion y recibir el MEssage general. */
-export const MergeServerErrorsToForm = (error : AxiosError, form : UseFormReturn<any>) : void => {
 
-    if(error.response?.data?.message){ // Add standard error message
+export const MergeServerErrorsToForm = async (error : AxiosError, form : UseFormReturn<any>) : Promise<void> => {
+    let errorData = error.response?.data;
+
+    if (errorData instanceof Blob) {
+        try {
+            const text = await errorData.text();
+            errorData = JSON.parse(text);
+        } catch (parseError) {
+            console.error("Failed to parse Blob error in errorService:", parseError);
+            errorData = {
+                message: "Error al procesar la respuesta del servidor"
+            };
+        }
+    }
+
+    if(errorData?.message) {
         form.setError('root', {
             type : 'server',
-            message : error.response?.data?.message
+            message : errorData.message
         })
     }
     
-    if(!error.isAxiosError || !isValidationError(error)) return;
-    const errors : LaravelErrors = error.response?.data?.errors ?? {};
-
-    ApplyServerErrorsToRHF({...errors }, form);
+    const status = error.response?.status;
+    if(!isValidationError(status)) return;
+    
+    const errors : LaravelErrors = errorData?.errors ?? {};
+    ApplyServerErrorsToRHF(errors, form);
 }

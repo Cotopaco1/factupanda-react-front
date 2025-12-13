@@ -9,16 +9,21 @@ export const useQuotationService = () => {
         setLoading(true);
         try {
             const response = await apiClient.post('/quotations', data, { responseType : 'blob'});
-            console.log(response);
             return response.data;
         } catch (error: any) {
-            // Agregar los errores del backend al objeto error para React Hook Form
-            if (error.response?.data?.errors) {
-                console.log("Errores desde QuotationService : ",error.response.data.errors);
-                error.backendErrors = error.response.data.errors;
+            if (error.response?.data instanceof Blob) {
+                try {
+                    const text = await error.response.data.text();
+                    error.response.data = JSON.parse(text);
+                } catch (parseError) {
+                    console.error("Failed to parse error response:", parseError);
+                    error.response.data = {
+                        message: "Error al procesar la respuesta del servidor"
+                    };
+                }
             }
             throw error;
-        }finally {
+        } finally {
             setLoading(false);
         }
     }

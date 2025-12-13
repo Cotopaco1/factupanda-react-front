@@ -53,8 +53,8 @@ export function AuthCard({onLogin}:Props) {
                 localStorage.setItem('tkn', data.token);
                 toast.success("Inicio de sesión exitoso");
             })
-            .catch((error)=>{
-                MergeServerErrorsToForm(error, form);
+            .catch(async (error)=>{
+                await MergeServerErrorsToForm(error, form);
                 console.log("Error root despues de MergeServerErrorsToForm: ", form.formState.errors?.root);
             })
     }

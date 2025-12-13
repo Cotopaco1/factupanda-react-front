@@ -24,6 +24,7 @@ import { useUserStore } from '@/stores/userStore'
 import { DialogQuantity } from '@/components/quotation/DialogQuantity'
 import type { Product } from '@/types/products'
 import { ButtonLoader } from '@/components/ButtonLoader'
+import { MergeServerErrorsToForm } from '@/services/errorService'
 
 type FormValues = z.infer<typeof quotationSchema>
 
@@ -102,24 +103,10 @@ function RouteComponent() {
       }catch(error){
         console.log("An error ocurred during saving default values",error )
       }
-      // Save data in defaultValues
       
     })
-    .catch((error) => {
-       const backendErrors = error.backendErrors as Record<string, string[]> | undefined
-      if(!backendErrors){
-        return;
-      }
-      Object.entries(backendErrors).forEach(([field, messages]) => {
-        // Laravel manda array de strings: usamos la primera o las unimos
-        const message = messages.join('\n')
-
-        form.setError(field as any, {
-          type: 'server',
-          message,
-        })
-      })
-
+    .catch(async (error) => {
+      await MergeServerErrorsToForm(error, form);
     });
   }
   const handleDeleteProduct = (index : number) => {

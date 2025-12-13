@@ -44,8 +44,8 @@ export function RegisterCard() {
             loginUser(data.data.token, data.data.user)
             setAuthdialogOpen(false);
 
-        }).catch((error)=>{
-            MergeServerErrorsToForm(error, form);
+        }).catch(async (error)=>{
+            await MergeServerErrorsToForm(error, form);
         })
     }
     return (

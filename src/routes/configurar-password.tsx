@@ -39,8 +39,8 @@ function RouteComponent() {
         loginUser(data.tkn, data.user);
         toast.success('Nueva contraseña configurada');
         navigate({ to: '/dashboard/quotation/create' })
-      }).catch((error) => {
-        MergeServerErrorsToForm(error, form)
+      }).catch(async(error) => {
+        await MergeServerErrorsToForm(error, form)
       })
   }
 
