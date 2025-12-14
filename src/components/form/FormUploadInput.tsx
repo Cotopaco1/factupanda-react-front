@@ -1,72 +1,90 @@
-import { apiClient } from "@/lib/apiClient"
 import { Controller, type Control } from "react-hook-form";
-import { Button } from "../ui/button";
-import { UploadIcon, XIcon } from "lucide-react";
+import { CheckIcon, UploadIcon, XIcon } from "lucide-react";
 import { Field, FieldError, FieldLabel } from "../ui/field";
-import { useRef, useState, type ChangeEvent } from "react";
-import type { AxiosError } from "axios";
+import React, { useEffect, useRef, useState, type ChangeEvent } from "react";
+import { useTemporaryFileService } from "@/services/temporaryFileService";
+import { ButtonLoader } from "../ButtonLoader";
+
 interface Props {
     name : string;
     control : Control<any>;
     label : string;
+    accept : React.InputHTMLAttributes<HTMLInputElement>["accept"]
 }
 
-export function FormUploadInput({name,control, label}:Props){
+export function FormUploadInput({name,control, label, accept}:Props){
     const [nameFile, setNameFile] = useState('');
-    const inputRef = useRef<HTMLInputElement | null>(null) // InputFile
-    /* Upload file, and save hash reference to this file in the database. */
-    function upload(data : FormData){
-        return apiClient.post('/temporary-files/logo', data)
+    const [blobUrl, setBlobUrl] = useState('');
+    const inputRef = useRef<HTMLInputElement | null>(null);
+    const { uploadLogo, loading } = useTemporaryFileService();
+
+    const showBloblUrl = (blob : Blob) => {
+        setBlobUrl(URL.createObjectURL(blob));
     }
+
+    useEffect(() => {
+        return () => {
+            if (blobUrl) URL.revokeObjectURL(blobUrl);
+        };
+    }, [blobUrl]);
+
 
     return (
         <Controller
             name={name}
             control={control}
             render={({field, fieldState}) => {
-
+                console.log(fieldState.error);
                 const resetField = () => {
                     if(inputRef.current){
                         inputRef.current.value = '';
                     }
                     field.onChange(null);
                     setNameFile('');
+                    setBlobUrl('');
                 }
 
-                const onChange = (event : ChangeEvent<HTMLInputElement>) => {
-                    /* If files[0] exists and value is valid, then use upload function */
+                const onChange = async (event : ChangeEvent<HTMLInputElement>) => {
                     const file = event.target.files?.[0];
                     if(!file) return;
+                    
                     setNameFile(file.name);
-                    const formData = new FormData();
-                    formData.append('file', file);
-                    upload(formData)
-                        .then((response)=>{
-                            const hash = response.data?.temporaryFile?.hash ?? null
-                            console.log('Hash recibido :', hash);
-                            /* Actualizar el valor del input asociado al formulario. */
-                            field.onChange(hash);
-                        })
-                        .catch((error:AxiosError)=>{
-                            const errors = error.response?.data?.errors;
-                            console.log("Ha habido un error al intentar uplodear el file..", error)
-                            if(!errors || !Array.isArray(errors) || errors.length < 1) return;
-                            control.setError(name, errors[0]);
-                        })
+                    
+                    try {
+                        const hash = await uploadLogo(file);
+                        field.onChange(hash);
+                        showBloblUrl(file);
+                    } catch (error: any) {
+                        setNameFile('');
+                        const fileErrors : string[] = error.response?.data?.errors?.[name] ?? [error.response?.data?.message];
+                        if(!fileErrors || !Array.isArray(fileErrors) || fileErrors.length < 1) return;
+                        const message = fileErrors.join(', ');
+                        control.setError(name, {
+                            message : message,
+                            type : 'server'
+                        });
+                    }
                 }
 
                 return (
                 <Field>
                     <FieldLabel>{label}</FieldLabel>
                     {/* Input type file hidden */}
-                    <input ref={inputRef} onChange={onChange}  type="file" hidden />
-                    <input {...field}  type="text" hidden/>
+                    <input ref={inputRef} onChange={onChange}  type="file" hidden accept={accept} />
+                    <input {...field}  type="text" hidden />
                     <div className="flex gap-2 items-center">
-                        {/* Button -> active input  */}
-                        <Button type="button" onClick={() => inputRef.current?.click()} variant='outline'><UploadIcon/></Button>
+                        <ButtonLoader type="button" onClick={() => inputRef.current?.click()} loading={loading} variant="outline">
+                            {!loading && <UploadIcon/>}
+                        </ButtonLoader>
                         {nameFile && <p>{nameFile}</p>}
-                        {nameFile && <XIcon onClick={resetField}/>}
+                        {nameFile && <XIcon onClick={resetField} className="cursor-pointer"/>}
                     </div>
+                    {blobUrl && (
+                        <div>
+                            <p className="text-success-foreground text-xs"> <CheckIcon className="inline size-5"/> Cargado </p>
+                            <img className="max-w-[200px]" src={blobUrl} alt={nameFile} />
+                        </div>
+                    )}
                     {fieldState.error && (
                         <FieldError errors={[fieldState.error]}/>
                     )}

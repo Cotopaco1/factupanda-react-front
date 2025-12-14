@@ -187,7 +187,7 @@ function RouteComponent() {
                 <FieldLegend>Personalización</FieldLegend>
                 <FieldGroup className='grid md:grid-cols-2'>
                     {/* FormUploadImage */}
-                    <FormUploadInput control={form.control} label='Logo de la empresa' name='temporary_logo'/>
+                    <FormUploadInput control={form.control} label='Logo de la empresa' name='temporary_logo' accept="image/jpeg,image/png,image/webp"/>
                     {/* FormColorPicker */}
                     <div>
                       <FieldLabel className='mb-3'>Colores</FieldLabel>
