@@ -1,6 +1,7 @@
 import { DashboardLayout, type BreadcrumbItemType } from '@/components/layouts/DashboardLayout';
 import { ProductsTable } from '@/components/products/ProductsTable'
 import { Button } from '@/components/ui/button';
+import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { PlusIcon } from 'lucide-react';
 
@@ -27,8 +28,8 @@ const breadcrumb : BreadcrumbItemType[] = [
 ];
 
 function RouteComponent() {
-
-     const { page,  per_page } = Route.useSearch();
+  useDocumentTitle('Productos');
+  const { page,  per_page } = Route.useSearch();
 
   return (
     <DashboardLayout title='Productos' description='Lista de productos' breadcrumb={breadcrumb}>

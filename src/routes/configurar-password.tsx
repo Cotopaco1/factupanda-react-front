@@ -11,13 +11,14 @@ import { FormRootErrorMessage } from '@/components/form/FormRootErrorMessage'
 import { toast } from 'sonner'
 import { useUserStore } from '@/stores/userStore'
 import { useNavigate } from '@tanstack/react-router'
+import { useDocumentTitle } from '@/hooks/useDocumentTitle'
 
 export const Route = createFileRoute('/configurar-password')({
   component: RouteComponent,
 })
 
 function RouteComponent() {
-
+  useDocumentTitle('Configurar contraseña');
   const { resetPassword, loading } = useUserService();
   const loginUser = useUserStore(data => data.loginUser);
   const navigate = useNavigate();
@@ -31,9 +32,7 @@ function RouteComponent() {
     },
     resolver: zodResolver(resetPasswordSchema)
   });
-  console.log(form.formState.errors);
   const onSubmit = (data) => {
-    console.log("Ha pasado el submit...")
     resetPassword(data)
       .then((data) => {
         loginUser(data.tkn, data.user);

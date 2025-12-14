@@ -12,12 +12,14 @@ import { CardDescription, CardTitle } from '@/components/ui/card'
 import { useState } from 'react'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { CheckIcon } from 'lucide-react'
+import { useDocumentTitle } from '@/hooks/useDocumentTitle'
 
 export const Route = createFileRoute('/olvide-password')({
   component: RouteComponent,
 })
 
 function RouteComponent() {
+  useDocumentTitle('Olvide contraseña');
   const {forgotPassword, loading} = useUserService();
   const [message, setMessage] = useState('');
   const form = useForm<forgotPasswordForm>({

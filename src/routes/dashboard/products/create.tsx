@@ -1,6 +1,7 @@
 import { ButtonLoader } from '@/components/ButtonLoader'
 import { DashboardLayout, type BreadcrumbItemType } from '@/components/layouts/DashboardLayout'
 import { ProductFormFields } from '@/components/products/ProductFormFields'
+import { useDocumentTitle } from '@/hooks/useDocumentTitle'
 import  { type ProductForm, productSchema } from '@/schemas/quotation'
 import { MergeServerErrorsToForm } from '@/services/errorService'
 import { useProductService } from '@/services/productService'
@@ -25,6 +26,7 @@ const breadcrumb : BreadcrumbItemType[] = [
 ]
 
 function RouteComponent() {
+    useDocumentTitle('Crear Producto');
     const {create, loading} = useProductService();
     const form = useForm<ProductForm>({
         defaultValues : {

@@ -25,6 +25,7 @@ import { DialogQuantity } from '@/components/quotation/DialogQuantity'
 import type { Product } from '@/types/products'
 import { ButtonLoader } from '@/components/ButtonLoader'
 import { MergeServerErrorsToForm } from '@/services/errorService'
+import { useDocumentTitle } from '@/hooks/useDocumentTitle'
 
 type FormValues = z.infer<typeof quotationSchema>
 
@@ -69,8 +70,8 @@ const retreiveQuotationDefaultValues = () : FormValues => {
   }
 }
 
-
 function RouteComponent() {
+  useDocumentTitle('Crear Cotización');
 
   const defaultValues = useMemo(()=>retreiveQuotationDefaultValues(), []);
   const form = useForm<FormValues>({
