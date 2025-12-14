@@ -34,7 +34,6 @@ export function FormUploadInput({name,control, label, accept}:Props){
             name={name}
             control={control}
             render={({field, fieldState}) => {
-                console.log(fieldState.error);
                 const resetField = () => {
                     if(inputRef.current){
                         inputRef.current.value = '';

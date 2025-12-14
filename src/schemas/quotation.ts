@@ -62,3 +62,5 @@ export const quotationSchema = z.object({
     notes : z.string().optional(),
     terms : z.string().optional(),
 })
+
+export type QuotationType = z.infer<typeof quotationSchema>
