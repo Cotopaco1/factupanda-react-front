@@ -1,7 +1,6 @@
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
   TableHead,
   TableHeader,
@@ -13,6 +12,18 @@ import { TrashIcon } from "lucide-react"
 import { useProductService } from "@/services/productService"
 import { useEffect, useState } from "react"
 import { TablePagination } from "../TablePagination"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
+import { toast } from "sonner"
 
 interface ProductsTableProps {
   page: number
@@ -21,21 +32,48 @@ interface ProductsTableProps {
 
 
 export function ProductsTable({ page, perPage }: ProductsTableProps) {
-  const {list, loading} = useProductService();
+  const {list, loading, deleteById} = useProductService();
+  const [open, setOpen] = useState(false);
+  const [cbDelete, setCbDelete] = useState<()=>void>();
   const [paginator, setPaginator] = useState<LaravelPaginator<Product>>();
-      
-  useEffect(()=>{
-    const filters = {per_page : perPage, page : page};
-    list(null, filters).then(response => {
+  const handleDeleteClick = (id:number) => {
+    setCbDelete(() => {
+      return () => deleteById(id).then(()=> {
+        toast.success("Producto Eliminado")
+        setCbDelete(()=>null);
+        getProducts({per_page : perPage, page : page})
+      })
+    })
+    setOpen(true);
+  }
+  const getProducts = (filters : {per_page : number, page : number}) => {
+    return list(null, filters).then(response => {
       setPaginator(response.data);
     });
+  }
+  useEffect(()=>{
+    const filters = {per_page : perPage, page : page};
+    getProducts(filters);
   }, [page, perPage])
 
-  if(loading) return <p>Cargandoo....</p>
+  if(loading) return <p className="p-4 ">Cargandoo....</p>
 
   return (
     <div>
-
+      <AlertDialog open={open} onOpenChange={setOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Estas seguro?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta acción no es reversible
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={cbDelete}>Continuar</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
       <Table>
         <TableHeader>
           <TableRow>
@@ -55,7 +93,7 @@ export function ProductsTable({ page, perPage }: ProductsTableProps) {
           {paginator?.data.map((product, index) => (
             <TableRow key={`${product.name}-${index}`}>
               <TableCell >
-                  <TrashIcon className="cursor-pointer hover:text-destructive transition-colors" onClick={()=>onDelete(index)}/>
+                  <TrashIcon className="cursor-pointer hover:text-destructive transition-colors" onClick={()=>handleDeleteClick(product.id)}/>
               </TableCell>
               <TableCell>{product.name}</TableCell>
               <TableCell>{product.description}</TableCell>

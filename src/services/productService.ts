@@ -28,6 +28,13 @@ export const useProductService = () => {
 
     }
 
+    const deleteById =  (id : number) => {
+        return handleFetch( async()=>{
+            const response = await apiClient.delete(`/products/${id}`);
+            return response.data;
+        })
+    }
+
     type ProductsListFilters = {
         per_page?: number;
         page?: number;
@@ -57,5 +64,5 @@ export const useProductService = () => {
     }
     
 
-    return { create, loading, list, searchProducts }
+    return { create, loading, list, searchProducts, deleteById }
 }
