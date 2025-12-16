@@ -1,7 +1,7 @@
 import type React from "react";
 import { createPortal } from "react-dom";
 import { Button } from "../ui/button";
-import { PartyPopperIcon, X } from "lucide-react";
+import { PartyPopperIcon, X, HandHeartIcon } from "lucide-react";
 
 type Props = {
     open : boolean;
@@ -38,19 +38,19 @@ export function DonationDomainAlertBanner({open, setOpen}:Props){
                 <div className="text-center relative border-t-0 mt-0 p-4 grid gap-6">
                     <div className="absolute inset-x-0 flex justify-center -top-10 ">
                         <div className="bg-blue-100 text-blue-700 p-4 rounded-full">
-                            <PartyPopperIcon size="60"/>
+                            <HandHeartIcon size="60"/>
                         </div>
                     </div>
-                    <div className="mt-16">
-                        <h3 className="text-3xl mb-6">¡Felicidades!</h3>
+                    <div className="mt-16 text-black">
+                        <h3 className="text-3xl mb-6">¡PandaAyudanos!</h3>
                         <p>Me alegra que <strong>FactuPanda</strong> te este siendo util, estoy buscando fondos para antes de febrero del 2026 comprar el dominio  <strong>Factupanda.com</strong> por $10 dolares y seguir teniendo Factupanda <strong>¡Online!</strong> </p>
                         <p>Si deseas apoyar a <strong>FactuPanda</strong>, te invito a donar en <a target="_blank" rel="noopener noreferrer" href={Donationlink} className="link-text">Buy me a Coffe</a> </p>
                     </div>
-                    <p className="text-left">Gracias por tu cooperación <span className="italic block"> Sergio Silva - Creador de FactuPanda </span> </p>
+                    <p className="text-left text-black">Gracias por tu cooperación <span className="italic block"> Sergio Silva - Creador de FactuPanda </span> </p>
                     <div className="mt-4 flex justify-around gap-4">
-                        <Button onClick={handleClose}>Lo pensaré 🥲</Button>
+                        <Button onClick={handleClose} className="cursor-pointer">Lo pensaré 🥲</Button>
                         <a href={Donationlink} target="_blank" rel="noopener noreferrer">
-                            <Button className="bg-success-foreground text-success">¡Quiero Contribuir! </Button>
+                            <Button className="bg-success-foreground text-success hover:bg-success-foreground/70! hover:text-success cursor-pointer">¡Quiero Contribuir! </Button>
                         </a>
                     </div>
                 </div>
