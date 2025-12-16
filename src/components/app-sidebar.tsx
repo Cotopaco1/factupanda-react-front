@@ -18,6 +18,8 @@ import { Link } from "@tanstack/react-router";
 import { useUserStore } from "@/stores/userStore";
 import { AuthDialog } from "./auth/AuthDialog";
 import { SidebarProfileCard } from "./sidebar-profile-card";
+import { LogoHorizontal } from "./LogoHorizontal";
+import { SwitchDarkAndLightMode } from "./SwitchDarkAndLightMode";
 
 type SidebarItem = {
   label: string
@@ -75,7 +77,11 @@ export function AppSidebar() {
   return (
     <Sidebar>
       <SidebarHeader>
-        <img src={LogoFactupanda} alt="" />
+        <LogoHorizontal/>
+        <div className="grid gap-2 my-2 ">
+          <p className="text-xs text-muted-foreground">Tema de la aplicación</p>
+          <SwitchDarkAndLightMode/>
+        </div>
       </SidebarHeader>
       <SidebarContent className="flex flex-col justify-between">
         <SidebarGroup >

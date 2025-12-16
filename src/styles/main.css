@@ -82,6 +82,10 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(0.269 0 0);
   --sidebar-ring: oklch(0.439 0 0);
+
+  /* Custom */
+  /* --highlight : oklch(97.7% 0.014 308.299);
+  --highlight-foreground :  oklch(55.8% 0.288 302.321); */
 }
 
 @theme inline {

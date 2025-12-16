@@ -37,8 +37,8 @@ const features : FeatureItemType[] = [
 function FeatureItem ({icon, title}:FeatureItemType){
   const IconC = icon;
   return (
-    <li className='p-4 shadow w-full md:p-8 '>
-      <div className='mb-4'>
+    <li className='p-4 shadow bg-secondary shadow-gray-300 dark:shadow-secondary-foreground w-full md:p-8 '>
+      <div className='mb-4'>  
         <IconC className='text-highlight'/>
       </div>
       <p>{title}</p>

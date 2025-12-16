@@ -7,7 +7,7 @@ export const Route = createFileRoute('/_layout')({
 
 function RouteComponent() {
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className="min-h-screen bg-background flex flex-col">
       <HeaderGuest/>
 
       <main className="flex-1 container w-full py-6 sm:px-6 lg:px-8">

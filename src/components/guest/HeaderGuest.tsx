@@ -4,11 +4,11 @@ import {
   SheetHeader,
   SheetTrigger,
 } from "@/components/ui/sheet"
-import HorizontalLogo from '@/assets/factupanda-logo-horizontal.svg'
 import {  Menu } from "lucide-react"
 import { useIsMobile } from "@/hooks/use-mobile"
 import type { LinkProps } from "@tanstack/react-router"
 import { Link } from "@tanstack/react-router"
+import { LogoHorizontal } from "../LogoHorizontal"
 
 type NavItem = {
     label : string;
@@ -46,7 +46,8 @@ function MobileMenu(){
             <SheetTrigger> <Menu/> </SheetTrigger>
             <SheetContent side="left">
                 <SheetHeader>
-                    <img src={HorizontalLogo} alt="logo-factupanda" />
+                    {/* <img color="white" src={HorizontalLogo} alt="logo-factupanda" /> */}
+                    <LogoHorizontal/>
                 </SheetHeader>
                 <div className="h-full px-4 flex flex-col justify-between">
                     <NavegationMenu/>
@@ -66,7 +67,8 @@ export function HeaderGuest(){
         <div className="container flex justify-between items-center">
             {/* Logo */}
             <div>
-                <img className="w-[150px]" src={HorizontalLogo} alt="logo factupanda" />
+                {/* <img width="500" style={{color: "white"}} src={HorizontalLogo} alt="logo factupanda" /> */}
+                <LogoHorizontal className="w-[150px]"/>
             </div>
             {/* Navegation Menu */}
             <div>
