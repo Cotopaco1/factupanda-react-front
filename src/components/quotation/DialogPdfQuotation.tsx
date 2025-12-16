@@ -10,16 +10,8 @@ import { DownloadIcon, XIcon } from "lucide-react";
     }
 export function DialogPdfQuotation({open, setOpen, url}:Props){
 
-    function download(){
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = "Cotización";
-        document.body.appendChild(a);
-        a.click();
-        
-    }
     return (
-        <Dialog open={open}>
+        <Dialog open={open} onOpenChange={setOpen}>
             <DialogContent className="max-w-[90vw] md:max-w-7xl h-[90vh] md:h-[90vh] flex flex-col">
                 <DialogHeader>
                     <div className="flex gap-4">
