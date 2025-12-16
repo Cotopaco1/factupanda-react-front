@@ -26,6 +26,8 @@ import type { Product } from '@/types/products'
 import { ButtonLoader } from '@/components/ButtonLoader'
 import { MergeServerErrorsToForm } from '@/services/errorService'
 import { useDocumentTitle } from '@/hooks/useDocumentTitle'
+import { DonationDomainAlertBanner } from '@/components/banners/DonationDomainAlertBanner'
+import { useBannerAlertService } from '@/services/bannerAlerts'
 
 type FormValues = z.infer<typeof quotationSchema>
 
@@ -83,8 +85,9 @@ function RouteComponent() {
     control : form.control,
     name : 'products'
   });
-  
+  const {incrementQuoteCount, DonationBannerShowedNow, shouldShowDonationBanner} = useBannerAlertService();
   const [pdfOpen, setPdfOpen] = useState(false);
+  const [donationDialogOpen, setDonationDialogOpen ] = useState(false);
   const [pdfUrl , setPdfUrl] = useState('');
   const [dialogQuantityOpen, setDialogQuantityOpen] = useState(false);
   const [cbDialogQuantity, setCbDialogQuantity] = useState<(number : number)=>any>(()=>null)
@@ -103,6 +106,15 @@ function RouteComponent() {
         localStorage.setItem('quotation.customization', JSON.stringify({primaryColor : data.primaryColor, secundaryColor : data.secundaryColor}))
       }catch(error){
         console.log("An error ocurred during saving default values",error )
+      }
+      
+      incrementQuoteCount();
+      
+      if(shouldShowDonationBanner()){
+        // Show dialog
+        setDonationDialogOpen(true);
+        // Save showed_at key in local storage.
+        DonationBannerShowedNow();
       }
       
     })
@@ -137,6 +149,7 @@ function RouteComponent() {
 
   return (
     <div>
+      <DonationDomainAlertBanner open={donationDialogOpen} setOpen={setDonationDialogOpen}/>
       <DialogQuantity open={dialogQuantityOpen} setOpen={setDialogQuantityOpen} cb={cbDialogQuantity} />
       <DialogPdfQuotation open={pdfOpen} setOpen={setPdfOpen} url={pdfUrl}/>
       {/* Dialog Product */}
