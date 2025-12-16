@@ -1,16 +1,11 @@
 import {
   Dialog,
-  DialogClose,
   DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
 import { DialogTrigger } from "@radix-ui/react-dialog"
 import { AuthCard } from "./AuthCard"
 import { Button } from "../ui/button"
-import { useState } from "react"
 import { useAuthDialogStore } from "@/stores/authDialog"
 
 
