@@ -82,7 +82,8 @@ export function ProductsTable({products, onDelete}:Props) {
             <TableCell>{product.quantity}</TableCell>
             <TableCell>{product.discount_percentage}</TableCell>
             <TableCell>{product.tax_percentage}</TableCell>
-            <TableCell>{ product.quantity && product.unit_price ? calculateProductTotal(product) : 0 }</TableCell>
+            {/* <TableCell>{ product.quantity && product.unit_price ? calculateProductTotal(product) : 0 }</TableCell> */}
+            <TableCell>${ product.quantity && product.unit_price ? quotationDto.calculateProductTotal(product).total.toLocaleString() : 0 }</TableCell>
           </TableRow>
         ))}
       </TableBody>
