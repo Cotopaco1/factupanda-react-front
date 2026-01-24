@@ -6,7 +6,7 @@ interface SelectOption {
 }
 
 interface Props {
-  label: string;
+  label: React.ReactNode;
   control: Control<any>;
   name: string;
   options: SelectOption[];

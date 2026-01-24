@@ -27,6 +27,7 @@ interface Quotation {
     terms: string,
     primaryColor: string,
     secundaryColor: string,
+    template: string,
 }
 
 interface QuotationForm {
@@ -40,6 +41,7 @@ interface QuotationForm {
     terms?: string,
     primaryColor?: string,
     secundaryColor?: string,
+    template?: string,
 }
 
 interface DueDates {

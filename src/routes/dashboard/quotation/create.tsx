@@ -35,6 +35,12 @@ export const Route = createFileRoute('/dashboard/quotation/create')({
   component: RouteComponent,
 })
 
+const templateOptions = [
+  { id: 'classic', name: 'Clásico' },
+  { id: 'executive', name: 'Ejecutivo' },
+  { id: 'modern', name: 'Moderno' },
+];
+
 const retreiveCompanyData = () => {
     const company = localStorage.getItem('quotation.company');
     return company ?
@@ -68,6 +74,7 @@ const retreiveQuotationDefaultValues = () : FormValues => {
         code : 'en-US',
         notes : '',
         terms : '',
+        template: 'classic',
         ... retreiveCustomizationSettings()
   }
 }
@@ -202,8 +209,25 @@ function RouteComponent() {
                 <FieldGroup className='grid md:grid-cols-2'>
                     {/* FormUploadImage */}
                     <FormUploadInput control={form.control} label='Logo de la empresa' name='temporary_logo' accept="image/jpeg,image/png,image/webp"/>
+                    
+                    <FormSelect 
+                        name="template"  
+                        control={form.control}
+                        options={templateOptions}
+                        optionLabel='name'
+                        optionValue='id'
+                        label={
+                          <div className="flex items-center gap-2">
+                            <span>Diseño del PDF</span>
+                            <span className="bg-primary text-primary-foreground text-[10px] font-bold px-1.5 py-0.5 rounded-full uppercase tracking-wider">
+                              Nuevo
+                            </span>
+                          </div>
+                        }
+                    />
+
                     {/* FormColorPicker */}
-                    <div>
+                    <div className="md:col-span-2">
                       <FieldLabel className='mb-3'>Colores</FieldLabel>
                       <div className='flex flex-col md:flex-row gap-4'>
                         <FormColorInput control={form.control} label="Principal" name="primaryColor" />

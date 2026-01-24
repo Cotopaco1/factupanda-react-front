@@ -61,6 +61,7 @@ export const quotationSchema = z.object({
         .min(1, "Debes agregar al menos un producto"),
     notes : z.string().optional(),
     terms : z.string().optional(),
+    template: z.string().optional(),
 })
 
 export type QuotationType = z.infer<typeof quotationSchema>
