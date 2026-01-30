@@ -103,3 +103,6 @@ A modern React application for generating PDF quotations with customization opti
 - Centralized error handling
 - Reusable component design
 - Proper TypeScript module augmentation
+
+## LocalStorage keys an usage
+- ....

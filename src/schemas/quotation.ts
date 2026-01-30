@@ -65,3 +65,35 @@ export const quotationSchema = z.object({
 })
 
 export type QuotationType = z.infer<typeof quotationSchema>
+
+export const quotationEditSchema = z.object({
+    number: z.string().min(1, "El número de cotización es obligatorio"),
+    date: z.string().min(1, "La fecha es obligatoria"),
+    due_date: z.string().min(1, "La fecha de vencimiento es obligatoria"),
+    currency: z.string().min(1, "La moneda es obligatoria"),
+    locale: z.enum(['en', 'es']),
+    notes: z.string().optional().nullable(),
+    terms: z.string().optional().nullable(),
+    discount: z.coerce.number().min(0).optional(),
+    is_flat_discount: z.boolean().optional(),
+    tax: z.coerce.number().min(0).max(100).optional(),
+    client: z.object({
+        name: z.string().min(1, "El nombre del cliente es obligatorio"),
+        fiscal_number: z.string().optional().nullable(),
+        address: z.string().optional().nullable(),
+        email: z.string().optional().nullable(),
+        phone: z.string().optional().nullable(),
+        city: z.string().optional().nullable(),
+    }),
+    company: z.object({
+        name: z.string().min(1, "El nombre de la empresa es obligatorio"),
+        fiscal_number: z.string().optional().nullable(),
+        address: z.string().optional().nullable(),
+        email: z.string().optional().nullable(),
+        phone: z.string().optional().nullable(),
+        city: z.string().optional().nullable(),
+    }),
+    products: z.array(productSchema).min(1, "Debes agregar al menos un producto"),
+})
+
+export type QuotationEditForm = z.infer<typeof quotationEditSchema>

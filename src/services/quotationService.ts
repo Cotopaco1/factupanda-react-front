@@ -1,9 +1,26 @@
 import { apiClient } from "@/lib/apiClient";
+import type { LaravelPaginator } from "@/types/paginator";
+import type { QuotationDetail, QuotationListItem, QuotationUpdatePayload } from "@/types/quotation";
+import type { ApiResponse } from "@/types/responses";
 import { useState } from "react";
-/* TODO: Utilizar el UseApiClient(). */
+
+export type QuotationsListFilters = {
+    per_page?: number;
+    page?: number;
+}
+
 export const useQuotationService = () => {
 
     const [loading, setLoading] = useState(false);
+
+    const handleFetch = async <T>(cb: () => Promise<T>): Promise<T> => {
+        setLoading(true);
+        try {
+            return await cb();
+        } finally {
+            setLoading(false);
+        }
+    }
 
     const createQuotation = async (data: any) : Promise<Blob> => {
         setLoading(true);
@@ -36,9 +53,41 @@ export const useQuotationService = () => {
         }).finally(()=> setLoading(false))
     }
 
+    const list = (filters: QuotationsListFilters = {}) => {
+        return handleFetch(async () => {
+            const response = await apiClient.get<ApiResponse<LaravelPaginator<QuotationListItem>>>('/quotations', { params: filters });
+            return response.data;
+        });
+    }
+
+    const getById = (id: number) => {
+        return handleFetch(async () => {
+            const response = await apiClient.get<ApiResponse<QuotationDetail>>(`/quotations/${id}`);
+            return response.data;
+        });
+    }
+
+    const update = (id: number, data: QuotationUpdatePayload) => {
+        return handleFetch(async () => {
+            const response = await apiClient.put<ApiResponse<{ quotation: QuotationListItem }>>(`/quotations/${id}`, data);
+            return response.data;
+        });
+    }
+
+    const deleteById = (id: number) => {
+        return handleFetch(async () => {
+            const response = await apiClient.delete(`/quotations/${id}`);
+            return response.data;
+        });
+    }
+
     return {
         createQuotation,
         getDueDates,
+        list,
+        getById,
+        update,
+        deleteById,
         loading
     }
 }

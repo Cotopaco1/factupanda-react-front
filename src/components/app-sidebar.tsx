@@ -1,4 +1,4 @@
-import { HomeIcon, PackageIcon, type LucideIcon } from "lucide-react"
+import { FileTextIcon, HomeIcon, PackageIcon, SettingsIcon, type LucideIcon } from "lucide-react"
 import LogoFactupanda from "@/assets/factupanda-logo-horizontal.svg"
 import {
   Sidebar,
@@ -38,11 +38,25 @@ const items: SidebarItem[] = [
     icon: HomeIcon,
   },
   {
+    label: "Mis Cotizaciones",
+    link: "/dashboard/quotations",
+    status: true,
+    auth: true,
+    icon: FileTextIcon,
+  },
+  {
     label: "Productos",
     link: "/dashboard/products",
     status: true,
     auth: true,
     icon: PackageIcon,
+  },
+  {
+    label: "Configuración",
+    link: "/dashboard/settings",
+    status: true,
+    auth: true,
+    icon: SettingsIcon,
   },
 ]
 
