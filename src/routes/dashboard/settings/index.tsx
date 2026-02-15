@@ -13,6 +13,7 @@ import { useTenantSettingsStore } from '@/stores/tenantSettingsStore'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { createFileRoute } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
+import { SettingsIcon } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -128,7 +129,12 @@ function RouteComponent() {
 
   if (initialLoading) {
     return (
-      <DashboardLayout title='Configuración' description='Cargando...' breadcrumb={breadcrumb}>
+      <DashboardLayout
+        title='Configuración'
+        description='Cambiando los datos prederminados de la aplicacion y de tu empresa'
+        descriptionIcon={<SettingsIcon />}
+        breadcrumb={breadcrumb}
+      >
         <div className="flex items-center justify-center py-10">
           <p className="text-muted-foreground">Cargando configuración...</p>
         </div>
@@ -137,7 +143,12 @@ function RouteComponent() {
   }
 
   return (
-    <DashboardLayout title='Configuración' description='Configura los datos predeterminados para tus cotizaciones' breadcrumb={breadcrumb}>
+    <DashboardLayout
+      title='Configuración'
+      description='Cambiando los datos prederminados de la aplicacion y de tu empresa'
+      descriptionIcon={<SettingsIcon />}
+      breadcrumb={breadcrumb}
+    >
       <form onSubmit={form.handleSubmit(onSubmit)} className='grid gap-6'>
         <FormRootErrorMessage form={form} />
 
