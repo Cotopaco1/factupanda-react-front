@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { Button } from '../../../components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { DashboardLayout, type BreadcrumbItemType } from '@/components/layouts/DashboardLayout'
 import { useForm, useFieldArray, type Resolver } from "react-hook-form"
 import { useEffect, useMemo, useState } from 'react'
 import { useQuotationService } from '@/services/quotationService';
@@ -16,7 +16,7 @@ import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { quotationSchema } from '@/schemas/quotation'
 import { ProductsTable } from '@/components/quotation/ProductsTable'
-import { PlusIcon } from 'lucide-react'
+import { FileTextIcon, PlusIcon } from 'lucide-react'
 import { DialogProductForm } from '@/components/products/DialogProductForm'
 import { FormUploadInput } from '@/components/form/FormUploadInput'
 import { FormColorInput } from '@/components/form/FormColorInput'
@@ -46,6 +46,17 @@ type ChangeItem = {
 export const Route = createFileRoute('/dashboard/quotation/create')({
   component: RouteComponent,
 })
+
+const breadcrumb: BreadcrumbItemType[] = [
+  {
+    label: 'Cotizaciones',
+    to: '/dashboard/quotations',
+  },
+  {
+    label: 'Crear',
+    to: '/dashboard/quotation/create',
+  },
+]
 
 const templateOptions = [
   { id: 'classic', name: 'Clásico' },
@@ -96,9 +107,11 @@ const normalizeTemplate = (template?: string | null) => {
 const retreiveQuotationDefaultValues = (useLocalDefaults = true) : FormValues => {
   const customizationSettings = retreiveCustomizationSettings(useLocalDefaults);
   const extraSettings = retreiveExtraSettings(useLocalDefaults);
+  const todayDate = new Date();
+  const today = `${todayDate.getFullYear()}-${String(todayDate.getMonth() + 1).padStart(2, '0')}-${String(todayDate.getDate()).padStart(2, '0')}`;
   return {
         number: "",
-        date: "",
+        date: today,
         due_date_id: 0,
         company: retreiveCompanyData(useLocalDefaults),
         client: {
@@ -132,15 +145,15 @@ function RouteComponent() {
   const [showSettingsShortcut, setShowSettingsShortcut] = useState(false);
 
   const defaultValues = useMemo(()=>retreiveQuotationDefaultValues(true), []);
-  const form = useForm<FormValues>({
+   const form = useForm<FormValues>({
       defaultValues: defaultValues,
     resolver : zodResolver(quotationSchema) as Resolver<FormValues>
   });
 
-  const {fields, append,remove} = useFieldArray({
-    control : form.control,
-    name : 'products'
-  });
+   const {fields, append, remove, update} = useFieldArray<FormValues, 'products'>({
+     control : form.control,
+     name : 'products'
+   });
   const {incrementQuoteCount, DonationBannerShowedNow, shouldShowDonationBanner} = useBannerAlertService();
   const [pdfOpen, setPdfOpen] = useState(false);
   const [donationDialogOpen, setDonationDialogOpen ] = useState(false);
@@ -178,8 +191,11 @@ function RouteComponent() {
       await MergeServerErrorsToForm(error, form);
     });
   }
-  const handleDeleteProduct = (index : number) => {
-      remove(index);
+   const handleDeleteProduct = (index : number) => {
+       remove(index);
+   }
+  const handleUpdateProduct = (index: number, data: FormValues['products'][number]) => {
+    update(index, data);
   }
 
   const cbProductSearch = (product : Product) => {
@@ -357,212 +373,203 @@ function RouteComponent() {
 
 
   return (
-    <div>
-      <DonationDomainAlertBanner open={donationDialogOpen} setOpen={setDonationDialogOpen}/>
-      <DialogQuantity open={dialogQuantityOpen} setOpen={setDialogQuantityOpen} cb={cbDialogQuantity} />
-      <DialogPdfQuotation open={pdfOpen} setOpen={setPdfOpen} url={pdfUrl}/>
-      <Dialog
-        open={confirmDialogOpen}
-        onOpenChange={(open) => {
-          setConfirmDialogOpen(open);
-          if (!open) {
-            setPendingChanges([]);
-            setPendingApply(null);
-            setConfirmDialogTitle('');
-            setShowSettingsShortcut(false);
-          }
-        }}
-      >
-        <DialogContent className='sm:max-w-2xl'>
-          <DialogHeader>
-            <DialogTitle>{confirmDialogTitle}</DialogTitle>
-            <DialogDescription>
-              Revisa los cambios antes de aplicar. Solo se muestran los campos que cambian.
-            </DialogDescription>
-          </DialogHeader>
-          <div className='grid gap-4 max-h-[420px] overflow-y-auto pr-1'>
-            {(['Empresa', 'Notas y terminos', 'Apariencia'] as ChangeItem['section'][]).map((section) => {
-              const sectionChanges = pendingChanges.filter((item) => item.section === section);
-              if (!sectionChanges.length) return null;
-              return (
-                <div key={section} className='grid gap-2'>
-                  <div className='text-sm font-semibold'>{section}</div>
-                  <div className='grid grid-cols-[minmax(120px,1fr)_minmax(140px,1fr)_minmax(140px,1fr)] gap-2 text-sm'>
-                    <div className='text-muted-foreground'>Campo</div>
-                    <div className='text-muted-foreground'>Actual</div>
-                    <div className='text-muted-foreground'>Nuevo</div>
-                    {sectionChanges.map((item) => (
-                      <div key={`${section}-${item.label}`} className='contents'>
-                        <div>{item.label}</div>
-                        <div className='break-words'>{item.current}</div>
-                        <div className='break-words'>{item.next}</div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-          <DialogFooter>
-            {showSettingsShortcut && (
-              <Button type='button' variant='outline' asChild>
-                <Link to='/dashboard/settings'>Editar configuracion de Empresa</Link>
-              </Button>
-            )}
-            <Button type='button' variant='outline' onClick={() => setConfirmDialogOpen(false)}>Cancelar</Button>
-            <Button type='button' onClick={handleConfirmApply}>Aplicar cambios</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-      {/* Dialog Product */}
-      <DialogProductForm cbAdd={append} open={dialogOpen} setOpen={setDialogOpen}/>
-     {/* Card con la info  */}
-      <Card className='w-full'>
-        <CardHeader>
-          <CardTitle>Generar Cotización</CardTitle>
-          <CardDescription>Genera una cotización en formato PDF, con los colores y el logo de tu Empresa.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={form.handleSubmit(onSubmit)} className='flex flex-col gap-6'>
-            {isLogin && (
-              <div className='flex flex-wrap gap-2'>
-                <div className='flex items-center gap-1.5'>
-                  <Button type='button' size='sm' variant='outline' onClick={handleLoadTenantSettings} disabled={loadingTenantSettings}>
-                    Cargar datos pre-configurados
-                  </Button>
-                  <InfoTooltip content='Carga empresa, notas, términos, colores y plantilla desde la configuración de la Empresa.' />
-                </div>
-                <div className='flex items-center gap-1.5'>
-                  <Button type='button' size='sm' variant='outline' onClick={handleLoadLocalSettings}>
-                    Pre-cargar desde almacenamiento local
-                  </Button>
-                  <InfoTooltip content='Usa el último guardado en este navegador al generar cotizaciones.' />
-                </div>
-              </div>
-            )}
-            {/* Section 1 */}
-            
-          
-              {/* Section 1 content */}
-              <FieldSet>
-                <FieldLegend>Detalles Cotización</FieldLegend>
-                <FieldGroup className='grid md:grid-cols-2'>
-                  <FormInput
-                    name="number"
-                    control={form.control}
-                    type='text'
-                    label='Número de Cotización'
-                    placeholder='001'
-                    className='md:col-span-2'
-                  />
-
-                  <FormInput
-                    name="date"
-                    control={form.control}
-                    type='date'
-                    label='Fecha'
-                    placeholder='001'
-                  />
-
-                  <FormSelect 
-                    name="due_date_id"  
-                    control={form.control}
-                    options={dueDates}
-                    optionLabel='name'
-                    optionValue='unique_id'
-                    label='Fecha de vencimiento'
-                  />
-                </FieldGroup>
-              </FieldSet>
-
-              <FieldSet>
-                <FieldLegend>Personalización</FieldLegend>
-                <FieldGroup className='grid md:grid-cols-2'>
-                    {/* FormUploadImage */}
-                    <FormUploadInput control={form.control} label='Logo de la empresa' name='temporary_logo' accept="image/jpeg,image/png,image/webp"/>
-                    
-                    <FormSelect 
-                        name="template"  
-                        control={form.control}
-                        options={templateOptions}
-                        optionLabel='name'
-                        optionValue='id'
-                        label={
-                          <div className="flex items-center gap-2">
-                            <span>Diseño del PDF</span>
-                            <span className="bg-primary text-primary-foreground text-[10px] font-bold px-1.5 py-0.5 rounded-full uppercase tracking-wider">
-                              Nuevo
-                            </span>
-                          </div>
-                        }
-                    />
-
-                    {/* FormColorPicker */}
-                    <div className="md:col-span-2">
-                      <FieldLabel className='mb-3'>Colores</FieldLabel>
-                      <div className='flex flex-col md:flex-row gap-4'>
-                        <FormColorInput control={form.control} label="Principal" name="primaryColor" />
-                        <FormColorInput control={form.control} label="Secundario" name="secundaryColor" />
-
-                      </div>
+    <DashboardLayout
+      title='Generar Cotización'
+      description='Genera una cotización en formato PDF, con los colores y el logo de tu Empresa.'
+      descriptionIcon={<FileTextIcon />}
+      breadcrumb={breadcrumb}
+    >
+      <div>
+        <DonationDomainAlertBanner open={donationDialogOpen} setOpen={setDonationDialogOpen}/>
+        <DialogQuantity open={dialogQuantityOpen} setOpen={setDialogQuantityOpen} cb={cbDialogQuantity} />
+        <DialogPdfQuotation open={pdfOpen} setOpen={setPdfOpen} url={pdfUrl}/>
+        <Dialog
+          open={confirmDialogOpen}
+          onOpenChange={(open) => {
+            setConfirmDialogOpen(open);
+            if (!open) {
+              setPendingChanges([]);
+              setPendingApply(null);
+              setConfirmDialogTitle('');
+              setShowSettingsShortcut(false);
+            }
+          }}
+        >
+          <DialogContent className='sm:max-w-2xl'>
+            <DialogHeader>
+              <DialogTitle>{confirmDialogTitle}</DialogTitle>
+              <DialogDescription>
+                Revisa los cambios antes de aplicar. Solo se muestran los campos que cambian.
+              </DialogDescription>
+            </DialogHeader>
+            <div className='grid gap-4 max-h-[420px] overflow-y-auto pr-1'>
+              {(['Empresa', 'Notas y terminos', 'Apariencia'] as ChangeItem['section'][]).map((section) => {
+                const sectionChanges = pendingChanges.filter((item) => item.section === section);
+                if (!sectionChanges.length) return null;
+                return (
+                  <div key={section} className='grid gap-2'>
+                    <div className='text-sm font-semibold'>{section}</div>
+                    <div className='grid grid-cols-[minmax(120px,1fr)_minmax(140px,1fr)_minmax(140px,1fr)] gap-2 text-sm'>
+                      <div className='text-muted-foreground'>Campo</div>
+                      <div className='text-muted-foreground'>Actual</div>
+                      <div className='text-muted-foreground'>Nuevo</div>
+                      {sectionChanges.map((item) => (
+                        <div key={`${section}-${item.label}`} className='contents'>
+                          <div>{item.label}</div>
+                          <div className='break-words'>{item.current}</div>
+                          <div className='break-words'>{item.next}</div>
+                        </div>
+                      ))}
                     </div>
-                </FieldGroup>
-              </FieldSet>
-
-              <FieldSet>
-                <FieldLegend>Información de la empresa</FieldLegend>
-                <FieldGroup>
-                  <CompanyOrCustomerFormField control={form.control} suffix='company' />
-                </FieldGroup>
-              </FieldSet>
-
-              <FieldSet>
-                <FieldLegend>Información del Cliente</FieldLegend>
-                <FieldGroup>
-                  <CompanyOrCustomerFormField control={form.control} suffix='client' />
-                </FieldGroup>
-              </FieldSet>
-              {/* Products Table */}
-              <FieldSet>
-                <FieldLegend>Productos</FieldLegend>
-                {form.formState.errors.products && (
-                  <FieldError errors={[form.formState.errors.products]}/>
-                )}
-                <div className='flex flex-col gap-2'>
-                  <div>
-                    <Button size="sm" type='button' onClick={() => setDialogOpen(true)}>
-                      <PlusIcon/> Agregar nuevo producto
-                    </Button>
                   </div>
-                  {isLogin && (
-                    <div>
-                      <ProductSearchInput cbSelected={cbProductSearch}/>
-                    </div>
-                  )}
-                </div>
-                <FieldGroup>
-                  <FieldContent>
-                    <ProductsTable products={fields} onDelete={handleDeleteProduct}/>
-                  </FieldContent>
-                </FieldGroup>
-              </FieldSet>
-
-              <FieldSet>
-                <FieldLegend>Información extra</FieldLegend>
-                <FieldGroup>
-                  <FieldContent className='grid md:grid-cols-2 gap-4'>
-                    <FormTextarea control={form.control} name='notes' label='Notas' placeholder='El envío corre por cuenta del cliente'/>
-                    <FormTextarea control={form.control} name='terms' label='Terminos y condiciones' placeholder='Enviar el pago a la cuenta #221332123'/>
-                  </FieldContent>
-                </FieldGroup>
-              </FieldSet>
-
-            <div>
-              <ButtonLoader className='py-6' loading={quotationLoading} type='submit'>Generar cotización</ButtonLoader>
+                );
+              })}
             </div>
-          </form>
-        </CardContent>
-      </Card>
-    </div>
+            <DialogFooter>
+              {showSettingsShortcut && (
+                <Button type='button' variant='outline' asChild>
+                  <Link to='/dashboard/settings'>Editar configuracion de Empresa</Link>
+                </Button>
+              )}
+              <Button type='button' variant='outline' onClick={() => setConfirmDialogOpen(false)}>Cancelar</Button>
+              <Button type='button' onClick={handleConfirmApply}>Aplicar cambios</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+        {/* Dialog Product */}
+        <DialogProductForm cbAdd={(data) => append(data)} open={dialogOpen} setOpen={setDialogOpen}/>
+        <form onSubmit={form.handleSubmit(onSubmit)} className='flex flex-col gap-8'>
+          {isLogin && (
+            <div className='flex flex-wrap gap-3 rounded-lg border border-muted-foreground/20 bg-muted/40 p-4'>
+              <div className='flex items-center gap-1.5'>
+                <Button type='button' size='sm' variant='outline' onClick={handleLoadTenantSettings} disabled={loadingTenantSettings}>
+                  Cargar datos pre-configurados
+                </Button>
+                <InfoTooltip content='Carga empresa, notas, términos, colores y plantilla desde la configuración de la Empresa.' />
+              </div>
+              <div className='flex items-center gap-1.5'>
+                <Button type='button' size='sm' variant='outline' onClick={handleLoadLocalSettings}>
+                  Pre-cargar desde almacenamiento local
+                </Button>
+                <InfoTooltip content='Usa el último guardado en este navegador al generar cotizaciones.' />
+              </div>
+            </div>
+          )}
+          <FieldSet>
+            <FieldLegend>Detalles Cotización</FieldLegend>
+            <FieldGroup className='grid md:grid-cols-2'>
+              <FormInput
+                name="number"
+                control={form.control}
+                type='text'
+                label='Número de Cotización'
+                placeholder='001'
+                className='md:col-span-2'
+              />
+
+              <FormInput
+                name="date"
+                control={form.control}
+                type='date'
+                label='Fecha'
+                placeholder='001'
+              />
+
+              <FormSelect 
+                name="due_date_id"  
+                control={form.control}
+                options={dueDates}
+                optionLabel='name'
+                optionValue='unique_id'
+                label='Fecha de vencimiento'
+              />
+            </FieldGroup>
+          </FieldSet>
+
+          <FieldSet>
+            <FieldLegend>Personalización</FieldLegend>
+            <FieldGroup className='grid md:grid-cols-2'>
+                <FormUploadInput control={form.control} label='Logo de la empresa' name='temporary_logo' accept="image/jpeg,image/png,image/webp"/>
+                
+                <FormSelect 
+                    name="template"  
+                    control={form.control}
+                    options={templateOptions}
+                    optionLabel='name'
+                    optionValue='id'
+                    label={
+                      <div className="flex items-center gap-2">
+                        <span>Diseño del PDF</span>
+                        <span className="bg-primary text-primary-foreground text-[10px] font-bold px-1.5 py-0.5 rounded-full uppercase tracking-wider">
+                          Nuevo
+                        </span>
+                      </div>
+                    }
+                />
+
+                <div className="md:col-span-2">
+                  <FieldLabel className='mb-3'>Colores</FieldLabel>
+                  <div className='flex flex-col md:flex-row gap-4'>
+                    <FormColorInput control={form.control} label="Principal" name="primaryColor" />
+                    <FormColorInput control={form.control} label="Secundario" name="secundaryColor" />
+
+                  </div>
+                </div>
+            </FieldGroup>
+          </FieldSet>
+
+          <FieldSet>
+            <FieldLegend>Información de la empresa</FieldLegend>
+            <FieldGroup>
+              <CompanyOrCustomerFormField control={form.control} suffix='company' />
+            </FieldGroup>
+          </FieldSet>
+
+          <FieldSet>
+            <FieldLegend>Información del Cliente</FieldLegend>
+            <FieldGroup>
+              <CompanyOrCustomerFormField control={form.control} suffix='client' />
+            </FieldGroup>
+          </FieldSet>
+          <FieldSet>
+            <FieldLegend>Productos</FieldLegend>
+            {form.formState.errors.products && (
+              <FieldError errors={[form.formState.errors.products]}/>
+            )}
+            <div className='flex flex-col gap-2'>
+              <div>
+                <Button size="sm" type='button' onClick={() => setDialogOpen(true)}>
+                  <PlusIcon/> Agregar nuevo producto
+                </Button>
+              </div>
+              {isLogin && (
+                <div>
+                  <ProductSearchInput cbSelected={cbProductSearch}/>
+                </div>
+              )}
+            </div>
+            <FieldGroup>
+              <FieldContent>
+              <ProductsTable products={fields} onDelete={handleDeleteProduct} onUpdate={handleUpdateProduct} />
+              </FieldContent>
+            </FieldGroup>
+          </FieldSet>
+
+          <FieldSet>
+            <FieldLegend>Información extra</FieldLegend>
+            <FieldGroup>
+              <FieldContent className='grid md:grid-cols-2 gap-4'>
+                <FormTextarea control={form.control} name='notes' label='Notas' placeholder='El envío corre por cuenta del cliente'/>
+                <FormTextarea control={form.control} name='terms' label='Terminos y condiciones' placeholder='Enviar el pago a la cuenta #221332123'/>
+              </FieldContent>
+            </FieldGroup>
+          </FieldSet>
+
+          <div className='flex justify-end'>
+            <ButtonLoader className='py-4' loading={quotationLoading} type='submit'>Generar cotización</ButtonLoader>
+          </div>
+        </form>
+      </div>
+    </DashboardLayout>
   )
 }

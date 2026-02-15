@@ -10,7 +10,8 @@ export const productSchema = z.object({
   tax_percentage: z.coerce.number().min(0).max(100).optional(),
 })
 
-export type ProductForm = z.infer<typeof productSchema>
+export type ProductFormInput = z.input<typeof productSchema>
+export type ProductForm = z.output<typeof productSchema>
 
 
 export const quotationSchema = z.object({

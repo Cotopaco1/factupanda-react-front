@@ -96,8 +96,9 @@ export function QuotationsTable({ page, perPage }: QuotationsTableProps) {
 
   const formatCurrency = (amount: number, currency: string) => {
     return new Intl.NumberFormat('es-CO', {
-      style: 'currency',
-      currency: currency || 'USD'
+      style: 'decimal',
+      minimumFractionDigits: currency === 'JPY' ? 0 : 2,
+      maximumFractionDigits: currency === 'JPY' ? 0 : 2,
     }).format(amount);
   }
 
@@ -151,11 +152,9 @@ export function QuotationsTable({ page, perPage }: QuotationsTableProps) {
             <TableRow key={quotation.id}>
               <TableCell>
                 <div className="flex items-center gap-2">
-                  <FileTextIcon
-                    className="cursor-pointer hover:text-primary transition-colors h-4 w-4"
-                    onClick={() => handlePdfClick(quotation.id)}
-                    title="Generar PDF"
-                  />
+                  <button type="button" onClick={() => handlePdfClick(quotation.id)} title="Generar PDF">
+                    <FileTextIcon className="cursor-pointer hover:text-primary transition-colors h-4 w-4" />
+                  </button>
                   <Link to="/dashboard/quotations/$id/edit" params={{ id: String(quotation.id) }}>
                     <PencilIcon
                       className="cursor-pointer hover:text-primary transition-colors h-4 w-4"

@@ -1,8 +1,6 @@
 import {
   Dialog,
-  DialogClose,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -11,7 +9,7 @@ import type React from "react"
 import { Button } from "../ui/button"
 import { ProductFormFields } from "./ProductFormFields"
 import { useForm } from "react-hook-form"
-import { type ProductForm, productSchema } from "@/schemas/quotation"
+import { type ProductForm, type ProductFormInput, productSchema } from "@/schemas/quotation"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useEffect } from "react"
 
@@ -28,7 +26,7 @@ export function DialogProductForm({open, setOpen, cbAdd}:Props){
         if(!open) form.reset();
     }, [open]);
 
-    const form = useForm<ProductForm>({
+    const form = useForm<ProductFormInput>({
         resolver : zodResolver(productSchema),
         defaultValues : {
             description : '',
@@ -41,20 +39,21 @@ export function DialogProductForm({open, setOpen, cbAdd}:Props){
         }
     });
 
-    const onSubmit = (data : ProductForm) => {
-        cbAdd(data);
+    const onSubmit = (data : ProductFormInput) => {
+        const parsed = productSchema.parse(data);
+        cbAdd(parsed);
         form.reset();
         setOpen(false);
     }
 
     return (
         <Dialog open={open} onOpenChange={setOpen} >
-            <DialogContent aria-description="Agrega un nuevo producto">
+            <DialogContent aria-description="Agrega un nuevo producto" className="sm:max-w-lg">
                 <DialogHeader>
                     <DialogTitle>Agregar producto</DialogTitle>
                 </DialogHeader>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-4">
-                    <div className="grid md:grid-cols-2 gap-4">
+                    <div className="grid md:grid-cols-2 gap-4 max-h-[65vh] overflow-y-auto pr-2">
                         <ProductFormFields control={form.control}  />
                     </div>
                     <DialogFooter>

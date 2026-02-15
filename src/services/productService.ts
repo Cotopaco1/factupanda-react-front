@@ -1,5 +1,6 @@
 import { apiClient } from "@/lib/apiClient";
 import type { ProductForm } from "@/schemas/quotation";
+import type { ProductCreateFormInput } from "@/schemas/products";
 import type { LaravelPaginator } from "@/types/paginator";
 import type { Product } from "@/types/products";
 import type { ApiResponse } from "@/types/responses";
@@ -21,7 +22,7 @@ export const useProductService = () => {
         }
     }
 
-    const create = (data) => {
+    const create = (data: ProductCreateFormInput) => {
         return handleFetch(async () => {
             const response = await apiClient.post<ApiResponse<{ product: Product }>>('/products', data)
             return response.data;
@@ -34,6 +35,13 @@ export const useProductService = () => {
             const response = await apiClient.delete(`/products/${id}`);
             return response.data;
         })
+    }
+
+    const update = (id: number, data: ProductCreateFormInput) => {
+        return handleFetch(async () => {
+            const response = await apiClient.put<ApiResponse<{ product: Product }>>(`/products/${id}`, data)
+            return response.data;
+        });
     }
 
     type ProductsListFilters = {
@@ -65,18 +73,18 @@ export const useProductService = () => {
     }
     
 
-    return { create, loading, list, searchProducts, deleteById }
+    return { create, update, loading, list, searchProducts, deleteById }
 }
 
 export class QuotationDTO {
 
     // private quotation : QuotationType;
     private products : ProductForm[];
-    public baseAmount : number;
-    public subTotal : number;
-    public discountAmount : number;
-    public taxAmount : number;
-    public total : number;
+    public baseAmount : number = 0;
+    public subTotal : number = 0;
+    public discountAmount : number = 0;
+    public taxAmount : number = 0;
+    public total : number = 0;
 
     constructor(products : ProductForm[]){
         this.products = products;

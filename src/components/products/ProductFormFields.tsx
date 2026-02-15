@@ -1,9 +1,9 @@
 import { type Control } from "react-hook-form";
 import { FormInput } from "../form/FormInput";
-import type { ProductForm } from "@/schemas/quotation";
+import type { ProductFormInput } from "@/schemas/quotation";
 
 interface Props {
-    control : Control<ProductForm>
+    control : Control<ProductFormInput>
 }
 
 export function ProductFormFields({control}:Props){

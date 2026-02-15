@@ -2,17 +2,15 @@ import {
   Table,
   TableBody,
   TableCell,
-  TableFooter,
   TableHead,
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import type { ProductForm } from "@/schemas/quotation"
+import type { ProductForm, ProductFormInput } from "@/schemas/quotation"
 import { QuotationDTO } from "@/services/productService"
-import { TrashIcon } from "lucide-react"
-import type { FieldArray } from "react-hook-form"
-
-type ProductField = FieldArray<ProductForm>
+import { PencilIcon, TrashIcon } from "lucide-react"
+import { DialogEditQuotationProduct } from "@/components/quotation/DialogEditQuotationProduct"
+import { useState } from "react"
 
 const columns = [
   'Nombre', 'Descripción', 'Unidad de medida', 'Precio Unitario',
@@ -22,28 +20,27 @@ const columns = [
 interface Props {
     products : ProductForm[],
     onDelete : (index : number) => void,
+    onUpdate : (index : number, data: ProductForm) => void,
 }
 
-export function ProductsTable({products, onDelete}:Props) {
+export function ProductsTable({products, onDelete, onUpdate}:Props) {
 
-  const applyDiscount = (baseAmount : number, discountPercentage : number) => {
-    return baseAmount * (discountPercentage / 100);
+  const [editOpen, setEditOpen] = useState(false);
+  const [editIndex, setEditIndex] = useState<number | null>(null);
+  const [selectedProduct, setSelectedProduct] = useState<ProductFormInput | null>(null);
+
+  const handleEditClick = (product: ProductForm, index: number) => {
+    setSelectedProduct(product as ProductFormInput);
+    setEditIndex(index);
+    setEditOpen(true);
   }
-  const applyTax = (subTotal : number, taxPercentage : number) => {
-    return subTotal * (taxPercentage / 100);
-  }
-  const calculateProductTotal = (prod : ProductForm) => {
-    if(!prod.quantity || !prod.unit_price) return 0;
-      const baseAmount = prod.quantity * prod.unit_price;
-      let subTotal = baseAmount;
-      if(prod.discount_percentage && prod.discount_percentage > 0) {
-        subTotal = applyDiscount(prod.quantity * prod.unit_price, prod.discount_percentage);
-      }
-      let total = subTotal;
-      if(prod.tax_percentage && prod.tax_percentage > 0) {
-         total = applyTax(subTotal, prod.tax_percentage );
-      }
-      return total;
+
+  const handleUpdateProduct = (data: ProductFormInput) => {
+    if (editIndex === null) return;
+    onUpdate(editIndex, data as ProductForm);
+    setEditOpen(false);
+    setSelectedProduct(null);
+    setEditIndex(null);
   }
 
   // SubTotal, Total.
@@ -60,6 +57,12 @@ export function ProductsTable({products, onDelete}:Props) {
 
   return (
     <>
+    <DialogEditQuotationProduct
+      open={editOpen}
+      setOpen={setEditOpen}
+      product={selectedProduct}
+      onSubmit={handleUpdateProduct}
+    />
     <Table>
       <TableHeader>
         <TableRow>
@@ -72,18 +75,23 @@ export function ProductsTable({products, onDelete}:Props) {
       <TableBody>
         {products.map((product, index) => (
           <TableRow key={`${product.name}-${index}`}>
-            <TableCell >
-                 <TrashIcon className="cursor-pointer hover:text-destructive transition-colors" onClick={()=>onDelete(index)}/>
+            <TableCell className="flex items-center gap-2">
+                 <button type="button" onClick={() => handleEditClick(product, index)} className="cursor-pointer">
+                   <PencilIcon className="hover:text-primary transition-colors" />
+                 </button>
+                 <button type="button" onClick={()=>onDelete(index)} className="cursor-pointer">
+                   <TrashIcon className="hover:text-destructive transition-colors" />
+                 </button>
             </TableCell>
             <TableCell>{product.name}</TableCell>
             <TableCell>{product.description}</TableCell>
             <TableCell>{product.unit_of_measurement}</TableCell>
-            <TableCell>{product.unit_price}</TableCell>
-            <TableCell>{product.quantity}</TableCell>
-            <TableCell>{product.discount_percentage}</TableCell>
-            <TableCell>{product.tax_percentage}</TableCell>
+            <TableCell>{Number(product.unit_price)}</TableCell>
+            <TableCell>{Number(product.quantity)}</TableCell>
+            <TableCell>{Number(product.discount_percentage ?? 0)}</TableCell>
+            <TableCell>{Number(product.tax_percentage ?? 0)}</TableCell>
             {/* <TableCell>{ product.quantity && product.unit_price ? calculateProductTotal(product) : 0 }</TableCell> */}
-            <TableCell>${ product.quantity && product.unit_price ? quotationDto.calculateProductTotal(product).total.toLocaleString() : 0 }</TableCell>
+             <TableCell>${ product.quantity && product.unit_price ? quotationDto.calculateProductTotal(product).total.toLocaleString() : 0 }</TableCell>
           </TableRow>
         ))}
       </TableBody>
