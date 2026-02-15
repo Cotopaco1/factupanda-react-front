@@ -1,5 +1,4 @@
-import { FileTextIcon, HomeIcon, PackageIcon, SettingsIcon, type LucideIcon } from "lucide-react"
-import LogoFactupanda from "@/assets/factupanda-logo-horizontal.svg"
+import { FileTextIcon, HomeIcon, PackageIcon, SettingsIcon, type LucideIcon, Ticket } from "lucide-react"
 import {
   Sidebar,
   SidebarContent,
@@ -20,12 +19,14 @@ import { AuthDialog } from "./auth/AuthDialog";
 import { SidebarProfileCard } from "./sidebar-profile-card";
 import { LogoHorizontal } from "./LogoHorizontal";
 import { SwitchDarkAndLightMode } from "./SwitchDarkAndLightMode";
+import { ReportTicketDialog } from "./support/ReportTicketDialog";
 
 type SidebarItem = {
   label: string
   link: string
   status: boolean
   auth: boolean
+  adminOnly?: boolean
   icon: LucideIcon
 }
 
@@ -58,16 +59,28 @@ const items: SidebarItem[] = [
     auth: true,
     icon: SettingsIcon,
   },
+  {
+    label: "Tickets",
+    link: "/dashboard/tickets",
+    status: true,
+    auth: true,
+    adminOnly: true,
+    icon: Ticket,
+  },
 ]
 
 
 type AppSidebarItemProps = {
   item: SidebarItem;
   isLogin : boolean;
+  isAdmin: boolean | null | undefined;
 }
 
-function AppSidebarItem({ item, isLogin }: AppSidebarItemProps) {
+function AppSidebarItem({ item, isLogin, isAdmin }: AppSidebarItemProps) {
   const Icon = item.icon
+
+  if (item.adminOnly && !isAdmin) return null
+
   return (
     <SidebarMenuItem>
       <SidebarMenuButton asChild>
@@ -88,6 +101,7 @@ function AppSidebarItem({ item, isLogin }: AppSidebarItemProps) {
 
 export function AppSidebar() {
   const isLogin = useUserStore((state) => state.isLogin);
+  const isAdmin = useUserStore((state) => state.user?.is_admin);
   return (
     <Sidebar>
       <SidebarHeader>
@@ -103,7 +117,7 @@ export function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               {items.map(item => (
-                <AppSidebarItem key={item.link} item={item} isLogin={isLogin} />
+                <AppSidebarItem key={item.link} item={item} isLogin={isLogin} isAdmin={isAdmin} />
               ))}
               {!isLogin && (
                   <SidebarMenuItem className="bg-warning text-warning-foreground p-2 rounded-xl">
@@ -113,7 +127,16 @@ export function AppSidebar() {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
-        <SidebarGroup />
+        <SidebarGroup>
+          <SidebarGroupLabel>Soporte</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <ReportTicketDialog />
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
