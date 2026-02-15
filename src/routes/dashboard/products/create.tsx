@@ -1,8 +1,8 @@
 import { ButtonLoader } from '@/components/ButtonLoader'
 import { DashboardLayout, type BreadcrumbItemType } from '@/components/layouts/DashboardLayout'
-import { ProductFormFields } from '@/components/products/ProductFormFields'
+import { PersistentProductFormFields } from '@/components/products/PersistentProductFormFields'
 import { useDocumentTitle } from '@/hooks/useDocumentTitle'
-import  { type ProductForm, productSchema } from '@/schemas/quotation'
+import { type ProductCreateFormInput, productCreateSchema } from '@/schemas/products'
 import { MergeServerErrorsToForm } from '@/services/errorService'
 import { useProductService } from '@/services/productService'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -28,20 +28,19 @@ const breadcrumb : BreadcrumbItemType[] = [
 function RouteComponent() {
     useDocumentTitle('Crear Producto');
     const {create, loading} = useProductService();
-    const form = useForm<ProductForm>({
+    const form = useForm<ProductCreateFormInput>({
         defaultValues : {
             description : '',
             discount_percentage : 0,
             name : '',
-            quantity : 1,
             tax_percentage : 0,
             unit_of_measurement : '',
             unit_price : 1
         },
-        resolver : zodResolver(productSchema),
+        resolver : zodResolver(productCreateSchema),
     });
-    const onSubmit = (data) => {
-        create(data).then(response => {
+    const onSubmit = (data: ProductCreateFormInput) => {
+        create(data).then(() => {
             form.reset();
             toast.success("Producto creado");
         }).catch( async (error) => {
@@ -52,7 +51,7 @@ function RouteComponent() {
     <DashboardLayout title='Crear Producto' description='Crea un nuevo producto para buscarlo facilmente al generar la cotización.' breadcrumb={breadcrumb}>
         <form onSubmit={form.handleSubmit(onSubmit)} className='grid gap-4' >
             <div className='grid md:grid-cols-2 gap-4'>
-                <ProductFormFields control={form.control}/>
+                <PersistentProductFormFields control={form.control}/>
 
             </div>
                 <div>
