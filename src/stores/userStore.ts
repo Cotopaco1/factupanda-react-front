@@ -1,5 +1,6 @@
 import type { UserType } from '@/types/users';
 import { create } from 'zustand'
+import { useTenantSettingsStore } from '@/stores/tenantSettingsStore'
 
 type UserStoreState = {
   user: UserType | undefined;
@@ -22,6 +23,7 @@ export const useUserStore = create<UserStoreState>((set) => ({
     setToken : (token) => set({token : token}),
     logoutUser : () => {
       set({token : '', user : undefined, isLogin : false});
+      useTenantSettingsStore.getState().clearSettings();
       localStorage.removeItem('tkn');
     },
     loginUser : (token , user ) => {

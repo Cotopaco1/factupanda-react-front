@@ -1,6 +1,6 @@
 import { apiClient } from "@/lib/apiClient";
 import type { LaravelPaginator } from "@/types/paginator";
-import type { QuotationDetail, QuotationListItem, QuotationUpdatePayload } from "@/types/quotation";
+import type { GeneratePdfPayload, QuotationDetail, QuotationListItem, QuotationUpdatePayload } from "@/types/quotation";
 import type { ApiResponse } from "@/types/responses";
 import { useState } from "react";
 
@@ -81,6 +81,32 @@ export const useQuotationService = () => {
         });
     }
 
+    const generatePdf = async (quotationId: number, options?: GeneratePdfPayload): Promise<Blob> => {
+        setLoading(true);
+        try {
+            const response = await apiClient.post(
+                `/quotations/${quotationId}/pdf`,
+                options ?? {},
+                { responseType: 'blob' }
+            );
+            return response.data;
+        } catch (error: any) {
+            if (error.response?.data instanceof Blob) {
+                try {
+                    const text = await error.response.data.text();
+                    error.response.data = JSON.parse(text);
+                } catch (parseError) {
+                    error.response.data = {
+                        message: "Error al procesar la respuesta del servidor"
+                    };
+                }
+            }
+            throw error;
+        } finally {
+            setLoading(false);
+        }
+    }
+
     return {
         createQuotation,
         getDueDates,
@@ -88,6 +114,7 @@ export const useQuotationService = () => {
         getById,
         update,
         deleteById,
+        generatePdf,
         loading
     }
 }

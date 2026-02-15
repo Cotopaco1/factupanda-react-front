@@ -7,6 +7,11 @@ export type TenantSettingsCompany = {
     email: string;
 }
 
+export type TenantSettingsQuotation = {
+    notes_default: string | null;
+    terms_default: string | null;
+}
+
 export type TenantSettings = {
     logo_url: string | null;
     logo_base64: string | null;
@@ -16,6 +21,7 @@ export type TenantSettings = {
     currency: string;
     locale: string;
     company: TenantSettingsCompany;
+    quotation?: TenantSettingsQuotation;
 }
 
 export type TenantSettingsUpdatePayload = {
@@ -27,4 +33,5 @@ export type TenantSettingsUpdatePayload = {
     currency?: string;
     locale?: string;
     company?: Partial<TenantSettingsCompany>;
+    quotation?: Partial<TenantSettingsQuotation>;
 }

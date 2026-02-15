@@ -17,6 +17,10 @@ export const tenantSettingsSchema = z.object({
     currency: z.string().length(3, "El código de moneda debe tener 3 caracteres").optional().or(z.literal('')),
     locale: z.string().max(5).optional(),
     company: tenantSettingsCompanySchema.optional(),
+    quotation: z.object({
+        notes_default: z.string().max(2000).optional().or(z.literal('')),
+        terms_default: z.string().max(2000).optional().or(z.literal('')),
+    }).optional(),
 })
 
 export type TenantSettingsForm = z.infer<typeof tenantSettingsSchema>

@@ -8,13 +8,14 @@ import { useDocumentTitle } from '@/hooks/useDocumentTitle'
 import { tenantSettingsSchema, type TenantSettingsForm } from '@/schemas/tenantSettings'
 import { MergeServerErrorsToForm } from '@/services/errorService'
 import { useTenantSettingsService } from '@/services/tenantSettingsService'
+import { useTenantSettingsStore } from '@/stores/tenantSettingsStore'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { createFileRoute } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Separator } from '@/components/ui/separator'
+import { FormTextarea } from '@/components/form/FormTextarea'
 
 export const Route = createFileRoute('/dashboard/settings/')({
   component: RouteComponent,
@@ -55,6 +56,7 @@ const currencyOptions = [
 function RouteComponent() {
   useDocumentTitle('Configuración');
   const { get, update, loading } = useTenantSettingsService();
+  const setTenantSettings = useTenantSettingsStore(state => state.setSettings);
   const [initialLoading, setInitialLoading] = useState(true);
 
   const form = useForm<TenantSettingsForm>({
@@ -65,6 +67,10 @@ function RouteComponent() {
       template: 'classic',
       currency: 'USD',
       locale: 'es',
+      quotation: {
+        notes_default: '',
+        terms_default: '',
+      },
       company: {
         name: '',
         address: '',
@@ -80,6 +86,7 @@ function RouteComponent() {
   useEffect(() => {
     get().then(response => {
       const settings = response.data.settings;
+      setTenantSettings(settings);
       form.reset({
         logo_url: settings.logo_url || '',
         primary_color: settings.primary_color || '#3B82F6',
@@ -87,6 +94,10 @@ function RouteComponent() {
         template: (settings.template?.replace('template-', '') as 'classic' | 'executive' | 'modern') || 'classic',
         currency: settings.currency || 'USD',
         locale: settings.locale || 'es',
+        quotation: {
+          notes_default: settings.quotation?.notes_default || '',
+          terms_default: settings.quotation?.terms_default || '',
+        },
         company: {
           name: settings.company?.name || '',
           address: settings.company?.address || '',
@@ -104,7 +115,9 @@ function RouteComponent() {
   }, []);
 
   const onSubmit = (data: TenantSettingsForm) => {
-    update(data).then(() => {
+    update(data).then((response) => {
+      const settings = response.data.settings;
+      setTenantSettings(settings);
       toast.success("Configuración guardada");
     }).catch(async (error) => {
       await MergeServerErrorsToForm(error, form);
@@ -161,6 +174,29 @@ function RouteComponent() {
                 name='secondary_color'
                 control={form.control}
                 label='Color Secundario'
+              />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Cotizaciones</CardTitle>
+            <CardDescription>Define los textos predeterminados para tus cotizaciones</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className='grid md:grid-cols-2 gap-4'>
+              <FormTextarea
+                name='quotation.notes_default'
+                control={form.control}
+                label='Notas por defecto'
+                placeholder='El envío corre por cuenta del cliente'
+              />
+              <FormTextarea
+                name='quotation.terms_default'
+                control={form.control}
+                label='Terminos y condiciones por defecto'
+                placeholder='Enviar el pago a la cuenta #221332123'
               />
             </div>
           </CardContent>

@@ -109,4 +109,15 @@ export type QuotationDetail = {
     products: QuotationProduct[];
 }
 
+export type GeneratePdfPayload = {
+    template?: 'classic' | 'executive' | 'modern';
+    logo_base64?: string;
+    primaryColor?: string;
+    secundaryColor?: string;
+    locale?: 'en' | 'es';
+    currency?: string;
+    notes?: string;
+    terms?: string;
+}
+
 export type { Quotation, QuotationForm, ClientForm, CompanyForm, DueDates };

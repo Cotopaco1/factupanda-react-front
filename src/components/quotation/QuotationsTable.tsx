@@ -7,8 +7,8 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import type { LaravelPaginator } from "@/types/paginator"
-import type { QuotationListItem } from "@/types/quotation"
-import { PencilIcon, TrashIcon } from "lucide-react"
+import type { GeneratePdfPayload, QuotationListItem } from "@/types/quotation"
+import { FileTextIcon, PencilIcon, TrashIcon } from "lucide-react"
 import { Link } from "@tanstack/react-router"
 import { useQuotationService } from "@/services/quotationService"
 import { useEffect, useState } from "react"
@@ -24,6 +24,8 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { toast } from "sonner"
+import { DialogPdfQuotation } from "./DialogPdfQuotation"
+import { DialogPdfOptions } from "./DialogPdfOptions"
 
 interface QuotationsTableProps {
   page: number
@@ -31,10 +33,15 @@ interface QuotationsTableProps {
 }
 
 export function QuotationsTable({ page, perPage }: QuotationsTableProps) {
-  const { list, loading, deleteById } = useQuotationService();
+  const { list, loading, deleteById, generatePdf } = useQuotationService();
   const [open, setOpen] = useState(false);
   const [cbDelete, setCbDelete] = useState<() => void>();
   const [paginator, setPaginator] = useState<LaravelPaginator<QuotationListItem>>();
+  const [pdfOptionsOpen, setPdfOptionsOpen] = useState(false);
+  const [pdfViewOpen, setPdfViewOpen] = useState(false);
+  const [pdfUrl, setPdfUrl] = useState('');
+  const [selectedQuotationId, setSelectedQuotationId] = useState<number | null>(null);
+  const [pdfLoading, setPdfLoading] = useState(false);
 
   const handleDeleteClick = (id: number) => {
     setCbDelete(() => {
@@ -52,6 +59,35 @@ export function QuotationsTable({ page, perPage }: QuotationsTableProps) {
       setPaginator(response.data);
     });
   }
+
+  const handlePdfClick = (quotationId: number) => {
+    setSelectedQuotationId(quotationId);
+    setPdfOptionsOpen(true);
+  }
+
+  const handleGeneratePdf = async (options: GeneratePdfPayload) => {
+    if (!selectedQuotationId) return;
+
+    setPdfLoading(true);
+    try {
+      const blob = await generatePdf(selectedQuotationId, options);
+      const url = URL.createObjectURL(blob);
+      setPdfUrl(url);
+      setPdfOptionsOpen(false);
+      setPdfViewOpen(true);
+    } catch (error) {
+      toast.error("Error al generar el PDF");
+    } finally {
+      setPdfLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    if (!pdfViewOpen && pdfUrl) {
+      URL.revokeObjectURL(pdfUrl);
+      setPdfUrl('');
+    }
+  }, [pdfViewOpen]);
 
   useEffect(() => {
     const filters = { per_page: perPage, page: page };
@@ -115,6 +151,11 @@ export function QuotationsTable({ page, perPage }: QuotationsTableProps) {
             <TableRow key={quotation.id}>
               <TableCell>
                 <div className="flex items-center gap-2">
+                  <FileTextIcon
+                    className="cursor-pointer hover:text-primary transition-colors h-4 w-4"
+                    onClick={() => handlePdfClick(quotation.id)}
+                    title="Generar PDF"
+                  />
                   <Link to="/dashboard/quotations/$id/edit" params={{ id: String(quotation.id) }}>
                     <PencilIcon
                       className="cursor-pointer hover:text-primary transition-colors h-4 w-4"
@@ -141,6 +182,17 @@ export function QuotationsTable({ page, perPage }: QuotationsTableProps) {
       <div className="mt-4">
         <TablePagination paginator={paginator}></TablePagination>
       </div>
+      <DialogPdfOptions
+        open={pdfOptionsOpen}
+        setOpen={setPdfOptionsOpen}
+        onGenerate={handleGeneratePdf}
+        loading={pdfLoading}
+      />
+      <DialogPdfQuotation
+        open={pdfViewOpen}
+        setOpen={setPdfViewOpen}
+        url={pdfUrl}
+      />
     </div>
   )
 }
