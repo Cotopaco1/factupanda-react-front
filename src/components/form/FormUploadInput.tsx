@@ -11,9 +11,10 @@ interface Props {
     label : string;
     accept : React.InputHTMLAttributes<HTMLInputElement>["accept"]
     purpose?: string;
+    disabled?: boolean;
 }
 
-export function FormUploadInput({name,control, label, accept, purpose}:Props){
+export function FormUploadInput({name,control, label, accept, purpose, disabled = false}:Props){
     const [nameFile, setNameFile] = useState('');
     const [blobUrl, setBlobUrl] = useState('');
     const inputRef = useRef<HTMLInputElement | null>(null);
@@ -45,6 +46,7 @@ export function FormUploadInput({name,control, label, accept, purpose}:Props){
                 }
 
                 const onChange = async (event : ChangeEvent<HTMLInputElement>) => {
+                    if (disabled) return;
                     const file = event.target.files?.[0];
                     if(!file) return;
                     
@@ -70,15 +72,18 @@ export function FormUploadInput({name,control, label, accept, purpose}:Props){
                 <Field>
                     <FieldLabel>{label}</FieldLabel>
                     {/* Input type file hidden */}
-                    <input ref={inputRef} onChange={onChange}  type="file" hidden accept={accept} />
+                    <input ref={inputRef} onChange={onChange} type="file" hidden accept={accept} disabled={disabled} />
                     <input {...field}  type="text" hidden />
                     <div className="flex gap-2 items-center">
-                        <ButtonLoader type="button" onClick={() => inputRef.current?.click()} loading={loading} variant="outline">
-                            {!loading && <UploadIcon/>}
+                        <ButtonLoader type="button" onClick={() => inputRef.current?.click()} loading={loading} variant="outline" disabled={disabled}>
+                            {!loading && <UploadIcon className={disabled ? 'opacity-50' : undefined} />}
                         </ButtonLoader>
                         {nameFile && <p>{nameFile}</p>}
                         {nameFile && <XIcon onClick={resetField} className="cursor-pointer"/>}
                     </div>
+                    {disabled && (
+                        <p className="text-xs text-muted-foreground">Deshabilitado por logo guardado</p>
+                    )}
                     {blobUrl && (
                         <div>
                             <p className="text-success-foreground text-xs"> <CheckIcon className="inline size-5"/> Cargado </p>

@@ -112,6 +112,7 @@ export type QuotationDetail = {
 export type GeneratePdfPayload = {
     template?: 'classic' | 'executive' | 'modern';
     logo_base64?: string;
+    use_tenant_logo?: boolean;
     primaryColor?: string;
     secundaryColor?: string;
     locale?: 'en' | 'es';

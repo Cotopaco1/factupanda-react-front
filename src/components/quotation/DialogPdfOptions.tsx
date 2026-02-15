@@ -1,5 +1,6 @@
 import type React from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
+import { Switch } from "@/components/ui/switch";
 import { FormSelect } from "@/components/form/FormSelect";
 import { FormColorInput } from "@/components/form/FormColorInput";
 import { ButtonLoader } from "@/components/ButtonLoader";
@@ -7,6 +8,7 @@ import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import type { GeneratePdfPayload } from "@/types/quotation";
 import { useTenantSettingsStore } from "@/stores/tenantSettingsStore";
+import { toast } from "sonner";
 
 interface Props {
     open: boolean;
@@ -23,11 +25,13 @@ const templateOptions = [
 
 export function DialogPdfOptions({ open, setOpen, onGenerate, loading }: Props) {
     const tenantSettings = useTenantSettingsStore((state) => state.settings);
-    const { control, handleSubmit, reset } = useForm<GeneratePdfPayload>({
+    const hasTenantLogo = Boolean(tenantSettings?.logo?.url);
+    const { control, handleSubmit, reset, watch, setValue } = useForm<GeneratePdfPayload>({
         defaultValues: {
             template: 'classic',
             primaryColor: '#000000',
             secundaryColor: '#666666',
+            use_tenant_logo: false,
         }
     });
 
@@ -39,6 +43,7 @@ export function DialogPdfOptions({ open, setOpen, onGenerate, loading }: Props) 
             template,
             primaryColor: tenantSettings.primary_color || '#000000',
             secundaryColor: tenantSettings.secondary_color || '#666666',
+            use_tenant_logo: false,
         })
     }, [open, reset, tenantSettings]);
 
@@ -73,6 +78,20 @@ export function DialogPdfOptions({ open, setOpen, onGenerate, loading }: Props) 
                             name="secundaryColor"
                         />
                     </div>
+                    <label className="flex items-center gap-3 text-sm text-muted-foreground">
+                      <Switch
+                        checked={Boolean(watch('use_tenant_logo'))}
+                        onCheckedChange={(checked) => {
+                          if (!hasTenantLogo) {
+                            toast.error('Configura el logo en Configuración para usarlo')
+                            setValue('use_tenant_logo', false, { shouldDirty: true })
+                            return
+                          }
+                          setValue('use_tenant_logo', checked, { shouldDirty: true })
+                        }}
+                      />
+                      Usar logo guardado de la empresa
+                    </label>
                     <div className="flex justify-end">
                         <ButtonLoader loading={loading}>
                             Generar PDF

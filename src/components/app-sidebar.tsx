@@ -20,6 +20,7 @@ import { SidebarProfileCard } from "./sidebar-profile-card";
 import { LogoHorizontal } from "./LogoHorizontal";
 import { SwitchDarkAndLightMode } from "./SwitchDarkAndLightMode";
 import { ReportTicketDialog } from "./support/ReportTicketDialog";
+import { UpdatesDialog } from "./support/UpdatesDialog";
 
 type SidebarItem = {
   label: string
@@ -131,6 +132,9 @@ export function AppSidebar() {
           <SidebarGroupLabel>Soporte</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
+              <SidebarMenuItem>
+                <UpdatesDialog />
+              </SidebarMenuItem>
               <SidebarMenuItem>
                 <ReportTicketDialog />
               </SidebarMenuItem>

@@ -33,6 +33,7 @@ import { DonationDomainAlertBanner } from '@/components/banners/DonationDomainAl
 import { useBannerAlertService } from '@/services/bannerAlerts'
 import { toast } from 'sonner'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Switch } from '@/components/ui/switch'
 
 type FormValues = z.infer<typeof quotationSchema>
 
@@ -124,6 +125,7 @@ const retreiveQuotationDefaultValues = (useLocalDefaults = true) : FormValues =>
         },
         products : [],
         temporary_logo : '',
+        use_tenant_logo: false,
         code : 'en-US',
         notes : extraSettings.notes,
         terms : extraSettings.terms,
@@ -136,6 +138,7 @@ function RouteComponent() {
   const isLogin = useUserStore(state => state.isLogin);
   const { get: getTenantSettings } = useTenantSettingsService();
   const tenantSettings = useTenantSettingsStore(state => state.settings);
+  const hasTenantLogo = Boolean(tenantSettings?.logo?.url);
   const setTenantSettings = useTenantSettingsStore(state => state.setSettings);
   const [loadingTenantSettings, setLoadingTenantSettings] = useState(false);
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
@@ -489,7 +492,32 @@ function RouteComponent() {
           <FieldSet>
             <FieldLegend>Personalización</FieldLegend>
             <FieldGroup className='grid md:grid-cols-2'>
-                <FormUploadInput control={form.control} label='Logo de la empresa' name='temporary_logo' accept="image/jpeg,image/png,image/webp"/>
+                <FormUploadInput
+                  control={form.control}
+                  label='Logo de la empresa'
+                  name='temporary_logo'
+                  accept="image/jpeg,image/png,image/webp"
+                  disabled={Boolean(form.watch('use_tenant_logo'))}
+                />
+                {isLogin && (
+                  <label className='flex items-center gap-3 text-sm text-muted-foreground'>
+                    <Switch
+                      checked={Boolean(form.watch('use_tenant_logo'))}
+                      onCheckedChange={(checked) => {
+                        if (!hasTenantLogo) {
+                          toast.error('Configura el logo en Configuración para usarlo')
+                          form.setValue('use_tenant_logo', false, { shouldDirty: true })
+                          return
+                        }
+                        form.setValue('use_tenant_logo', checked, { shouldDirty: true })
+                        if (checked) {
+                          form.setValue('temporary_logo', null, { shouldDirty: true })
+                        }
+                      }}
+                    />
+                    Usar logo guardado de la empresa
+                  </label>
+                )}
                 
                 <FormSelect 
                     name="template"  

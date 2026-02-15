@@ -31,6 +31,7 @@ export const quotationSchema = z.object({
         .positive("Debes seleccionar una fecha de vencimiento"),
 
     temporary_logo: z.string().optional().nullable(),
+    use_tenant_logo: z.boolean().optional(),
     primaryColor : z.string().min(1, "El color es obligatorio"),
     secundaryColor : z.string().min(1, "El color es obligatorio"),
 
