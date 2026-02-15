@@ -4,6 +4,7 @@ import { FormColorInput } from '@/components/form/FormColorInput'
 import { FormInput } from '@/components/form/FormInput'
 import { FormSelect } from '@/components/form/FormSelect'
 import { FormRootErrorMessage } from '@/components/form/FormRootErrorMessage'
+import { FormUploadInput } from '@/components/form/FormUploadInput'
 import { useDocumentTitle } from '@/hooks/useDocumentTitle'
 import { tenantSettingsSchema, type TenantSettingsForm } from '@/schemas/tenantSettings'
 import { MergeServerErrorsToForm } from '@/services/errorService'
@@ -28,7 +29,6 @@ const breadcrumb: BreadcrumbItemType[] = [
   }
 ]
 
-// TODO: Activar estos campos cuando estén listos
 const SHOW_LOGO_URL = false;
 const SHOW_REGIONAL_SETTINGS = false;
 
@@ -62,6 +62,7 @@ function RouteComponent() {
   const form = useForm<TenantSettingsForm>({
     defaultValues: {
       logo_url: '',
+      logo_hash: '',
       primary_color: '#3B82F6',
       secondary_color: '#1E40AF',
       template: 'classic',
@@ -89,6 +90,7 @@ function RouteComponent() {
       setTenantSettings(settings);
       form.reset({
         logo_url: settings.logo_url || '',
+        logo_hash: '',
         primary_color: settings.primary_color || '#3B82F6',
         secondary_color: settings.secondary_color || '#1E40AF',
         template: (settings.template?.replace('template-', '') as 'classic' | 'executive' | 'modern') || 'classic',
@@ -146,6 +148,13 @@ function RouteComponent() {
           </CardHeader>
           <CardContent className='grid gap-4'>
             <div className='grid md:grid-cols-2 gap-4'>
+              <FormUploadInput
+                name='logo_hash'
+                control={form.control}
+                label='Logo de la Empresa'
+                accept='image/jpeg,image/png,image/webp'
+                purpose='tenant_logo'
+              />
               {SHOW_LOGO_URL && (
                 <FormInput
                   name='logo_url'

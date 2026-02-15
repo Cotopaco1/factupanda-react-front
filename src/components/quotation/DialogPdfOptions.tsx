@@ -3,8 +3,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
 import { FormSelect } from "@/components/form/FormSelect";
 import { FormColorInput } from "@/components/form/FormColorInput";
 import { ButtonLoader } from "@/components/ButtonLoader";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import type { GeneratePdfPayload } from "@/types/quotation";
+import { useTenantSettingsStore } from "@/stores/tenantSettingsStore";
 
 interface Props {
     open: boolean;
@@ -20,13 +22,25 @@ const templateOptions = [
 ];
 
 export function DialogPdfOptions({ open, setOpen, onGenerate, loading }: Props) {
-    const { control, handleSubmit } = useForm<GeneratePdfPayload>({
+    const tenantSettings = useTenantSettingsStore((state) => state.settings);
+    const { control, handleSubmit, reset } = useForm<GeneratePdfPayload>({
         defaultValues: {
             template: 'classic',
             primaryColor: '#000000',
             secundaryColor: '#666666',
         }
     });
+
+    useEffect(() => {
+        if (!open) return;
+        if (!tenantSettings) return;
+        const template = (tenantSettings.template?.replace('template-', '') as 'classic' | 'executive' | 'modern') || 'classic'
+        reset({
+            template,
+            primaryColor: tenantSettings.primary_color || '#000000',
+            secundaryColor: tenantSettings.secondary_color || '#666666',
+        })
+    }, [open, reset, tenantSettings]);
 
     const onSubmit = (data: GeneratePdfPayload) => {
         onGenerate(data);

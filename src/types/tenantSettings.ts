@@ -15,6 +15,13 @@ export type TenantSettingsQuotation = {
 export type TenantSettings = {
     logo_url: string | null;
     logo_base64: string | null;
+    logo?: {
+        key: string;
+        url: string;
+        mime: string;
+        size: number;
+        updated_at: string;
+    } | null;
     primary_color: string | null;
     secondary_color: string | null;
     template: string;
@@ -27,6 +34,7 @@ export type TenantSettings = {
 export type TenantSettingsUpdatePayload = {
     logo_url?: string | null;
     logo_base64?: string | null;
+    logo_hash?: string | null;
     primary_color?: string | null;
     secondary_color?: string | null;
     template?: string;

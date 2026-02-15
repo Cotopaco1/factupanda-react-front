@@ -11,6 +11,7 @@ export const tenantSettingsCompanySchema = z.object({
 
 export const tenantSettingsSchema = z.object({
     logo_url: z.string().url("Ingresa una URL válida").optional().or(z.literal('')).nullable(),
+    logo_hash: z.string().optional().or(z.literal('')),
     primary_color: z.string().max(20).optional().nullable(),
     secondary_color: z.string().max(20).optional().nullable(),
     template: z.enum(['classic', 'executive', 'modern']).optional(),

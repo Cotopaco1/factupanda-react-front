@@ -10,13 +10,14 @@ interface Props {
     control : Control<any>;
     label : string;
     accept : React.InputHTMLAttributes<HTMLInputElement>["accept"]
+    purpose?: string;
 }
 
-export function FormUploadInput({name,control, label, accept}:Props){
+export function FormUploadInput({name,control, label, accept, purpose}:Props){
     const [nameFile, setNameFile] = useState('');
     const [blobUrl, setBlobUrl] = useState('');
     const inputRef = useRef<HTMLInputElement | null>(null);
-    const { uploadLogo, loading } = useTemporaryFileService();
+    const { uploadLogo, uploadTemporaryFile, loading } = useTemporaryFileService();
 
     const showBloblUrl = (blob : Blob) => {
         setBlobUrl(URL.createObjectURL(blob));
@@ -50,7 +51,7 @@ export function FormUploadInput({name,control, label, accept}:Props){
                     setNameFile(file.name);
                     
                     try {
-                        const hash = await uploadLogo(file);
+                        const hash = purpose ? await uploadTemporaryFile(file, purpose) : await uploadLogo(file);
                         field.onChange(hash);
                         showBloblUrl(file);
                     } catch (error: any) {
