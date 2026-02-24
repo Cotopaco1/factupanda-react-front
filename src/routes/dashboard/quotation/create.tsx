@@ -157,7 +157,7 @@ function RouteComponent() {
      control : form.control,
      name : 'products'
    });
-  const {incrementQuoteCount, DonationBannerShowedNow, shouldShowDonationBanner} = useBannerAlertService();
+  const {incrementQuoteCount } = useBannerAlertService();
   const [pdfOpen, setPdfOpen] = useState(false);
   const [donationDialogOpen, setDonationDialogOpen ] = useState(false);
   const [pdfUrl , setPdfUrl] = useState('');
@@ -179,15 +179,8 @@ function RouteComponent() {
       }catch(error){
         console.log("An error ocurred during saving default values",error )
       }
-      
+
       incrementQuoteCount();
-      
-      if(shouldShowDonationBanner()){
-        // Show dialog
-        setDonationDialogOpen(true);
-        // Save showed_at key in local storage.
-        DonationBannerShowedNow();
-      }
       
     })
     .catch(async (error) => {
