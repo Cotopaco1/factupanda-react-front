@@ -6,6 +6,7 @@ import { toast } from 'sonner'
 import { createTicket } from '@/services/ticketsService'
 import { ticketSchema, type TicketFormValues } from '@/schemas/ticket'
 import { Button } from '@/components/ui/button'
+import { Spinner } from '@/components/ui/spinner'
 import { MessageCircle } from 'lucide-react'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { FormInput } from '@/components/form/FormInput'
@@ -29,6 +30,7 @@ export function ReportTicketDialog() {
     },
     resolver: zodResolver(ticketSchema),
   })
+  const isSubmitting = form.formState.isSubmitting
 
   const metadata = useMemo(() => {
     if (typeof window === 'undefined') return undefined
@@ -55,7 +57,7 @@ export function ReportTicketDialog() {
   }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={(nextOpen) => !isSubmitting && setOpen(nextOpen)}>
       <DialogTrigger asChild>
         <Button variant='outline' size='sm' className='w-full justify-start gap-2'>
           <MessageCircle className='size-4' />
@@ -93,8 +95,24 @@ export function ReportTicketDialog() {
             required
           />
           <DialogFooter>
-            <Button type='button' variant='outline' onClick={() => setOpen(false)}>Cancelar</Button>
-            <Button type='submit'>Enviar</Button>
+            <Button
+              type='button'
+              variant='outline'
+              disabled={isSubmitting}
+              onClick={() => setOpen(false)}
+            >
+              Cancelar
+            </Button>
+            <Button type='submit' disabled={isSubmitting}>
+              {isSubmitting ? (
+                <>
+                  <Spinner />
+                  Enviando...
+                </>
+              ) : (
+                'Enviar'
+              )}
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>
