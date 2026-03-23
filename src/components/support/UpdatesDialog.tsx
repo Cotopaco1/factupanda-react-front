@@ -10,11 +10,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog'
 
-const updates = [
-  'Correción de error 500, al subir un logo y pasar mucho tiempo en la pagina.',
-  'Nuevo sistema de monitoreo de errores, ahora es mas facil detectarlos y arreglarlos',
-  'En desarrollo : Selector de separador de decimales.',
-]
+const announcementDate = '3/23/2026'
 
 export function UpdatesDialog() {
   const [open, setOpen] = useState(false)
@@ -22,24 +18,37 @@ export function UpdatesDialog() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant='outline' size='sm' className='w-full justify-start gap-2'>
-          <Star className='size-4' />
-          Novedades
-          <span className='text-xs'> (3/09/2026) </span>
+        <Button variant='outline' className='w-full justify-start gap-2 py-5 text-sm'>
+          <Star className='size-4.5' />
+          Anuncios
+          <span className='text-xs text-muted-foreground'>({announcementDate})</span>
         </Button>
       </DialogTrigger>
-      <DialogContent className='sm:max-w-lg'>
+      <DialogContent className='sm:max-w-xl'>
         <DialogHeader>
-          <DialogTitle>Novedades <span className='text-xs text-muted-foreground'>3/9/2026</span> </DialogTitle>
-          <DialogDescription></DialogDescription>
+          <DialogTitle className='text-xl'>
+            Anuncios <span className='text-sm font-normal text-muted-foreground'>{announcementDate}</span>
+          </DialogTitle>
+          <DialogDescription className='text-sm leading-6'>
+            Compartimos una mejora reciente en la infraestructura de la plataforma.
+          </DialogDescription>
         </DialogHeader>
-        <div className='grid gap-3 text-sm text-muted-foreground'>
-          <ul className='list-disc pl-4 text-foreground'>
-            {updates.map((item) => (
-              <li key={item}>{item}</li>
-            ))}
-          </ul>
-          <p>Sus reportes han sido utiles, ¡gracias!</p>
+        <div className='grid gap-4 text-base leading-7 text-foreground'>
+          <p>
+            Hemos migrado parte de nuestros servicios con el objetivo de mejorar
+            el rendimiento general de la plataforma y responder mejor al
+            crecimiento del tráfico.
+          </p>
+          <p>
+            En algunos momentos, ese aumento de visitas podía hacer que ciertas
+            páginas se sintieran lentas e incluso presentaran fallos
+            intermitentes. Con esta actualización buscamos una experiencia más
+            estable, rápida y confiable.
+          </p>
+          <p className='font-medium text-muted-foreground'>
+            Son problemas que, en el fondo, también nos alegran: significan que
+            cada vez más personas están usando FactuPanda.
+          </p>
         </div>
       </DialogContent>
     </Dialog>
