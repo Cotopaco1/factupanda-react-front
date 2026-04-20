@@ -4,6 +4,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { useForm, useFieldArray } from "react-hook-form"
 import { useEffect, useState } from 'react'
 import { useQuotationService } from '@/services/quotationService'
+import { useCurrencyService } from '@/services/currencyService'
+import { useCurrencyStore } from '@/stores/currencyStore'
 import { FieldSet, FieldLegend, FieldGroup, FieldContent, FieldError } from "@/components/ui/field"
 import { FormInput } from '@/components/form/FormInput'
 import { FormSelect } from '@/components/form/FormSelect'
@@ -19,28 +21,18 @@ import { MergeServerErrorsToForm } from '@/services/errorService'
 import { useDocumentTitle } from '@/hooks/useDocumentTitle'
 import { toast } from 'sonner'
 import { DashboardLayout, type BreadcrumbItemType } from '@/components/layouts/DashboardLayout'
+import { DEFAULT_CURRENCY_CODE, findCurrencyByCode, mapCurrenciesToSelectOptions } from '@/lib/currency'
 
 export const Route = createFileRoute('/dashboard/quotations/$id/edit')({
   component: RouteComponent,
 })
 
-// TODO: Activar cuando estén listos
-const SHOW_CURRENCY_SELECT = false
+const SHOW_CURRENCY_SELECT = true
 const SHOW_LOCALE_SELECT = false
 
 const localeOptions = [
   { value: 'es', label: 'Español' },
   { value: 'en', label: 'English' },
-]
-
-const currencyOptions = [
-  { value: 'USD', label: 'USD' },
-  { value: 'EUR', label: 'EUR' },
-  { value: 'MXN', label: 'MXN' },
-  { value: 'COP', label: 'COP' },
-  { value: 'ARS', label: 'ARS' },
-  { value: 'CLP', label: 'CLP' },
-  { value: 'PEN', label: 'PEN' },
 ]
 
 function RouteComponent() {
@@ -53,12 +45,18 @@ function RouteComponent() {
     { label: 'Editar', to: '.' }
   ]
 
+  const { list: listCurrencies } = useCurrencyService()
+  const currencies = useCurrencyStore((state) => state.currencies)
+  const hasLoadedCurrencies = useCurrencyStore((state) => state.hasLoaded)
+  const setCurrencies = useCurrencyStore((state) => state.setCurrencies)
+  const setCurrenciesLoaded = useCurrencyStore((state) => state.setHasLoaded)
+
   const form = useForm<QuotationEditForm>({
     defaultValues: {
       number: '',
       date: '',
       due_date: '',
-      currency: 'USD',
+      currency: DEFAULT_CURRENCY_CODE,
       locale: 'es',
       notes: '',
       terms: '',
@@ -86,7 +84,7 @@ function RouteComponent() {
     resolver: zodResolver(quotationEditSchema)
   })
 
-  const { fields, append, remove } = useFieldArray({
+  const { fields, append, remove, update: updateProduct } = useFieldArray({
     control: form.control,
     name: 'products'
   })
@@ -94,6 +92,23 @@ function RouteComponent() {
   const { getById, update, loading } = useQuotationService()
   const [initialLoading, setInitialLoading] = useState(true)
   const [dialogOpen, setDialogOpen] = useState(false)
+  const selectedCurrencyCode = form.watch('currency')
+  const selectedCurrency = findCurrencyByCode(currencies, selectedCurrencyCode)
+  const currencyOptions = mapCurrenciesToSelectOptions(currencies)
+
+  useEffect(() => {
+    if (hasLoadedCurrencies) return
+
+    listCurrencies()
+      .then((response) => {
+        setCurrencies(response.data.currencies ?? [])
+        setCurrenciesLoaded(true)
+      })
+      .catch(() => {
+        setCurrenciesLoaded(true)
+        toast.error('No se pudo cargar el catálogo de monedas')
+      })
+  }, [hasLoadedCurrencies, listCurrencies, setCurrencies, setCurrenciesLoaded])
 
   useEffect(() => {
     getById(Number(id))
@@ -109,7 +124,7 @@ function RouteComponent() {
           number: q.number || '',
           date: formatDate(q.date),
           due_date: formatDate(q.due_date),
-          currency: q.currency || 'USD',
+          currency: q.currency || DEFAULT_CURRENCY_CODE,
           locale: (q.locale as 'en' | 'es') || 'es',
           notes: q.notes || '',
           terms: q.terms || '',
@@ -165,6 +180,10 @@ function RouteComponent() {
 
   const handleDeleteProduct = (index: number) => {
     remove(index)
+  }
+
+  const handleUpdateProduct = (index: number, data: QuotationEditForm['products'][number]) => {
+    updateProduct(index, data)
   }
 
   if (initialLoading) {
@@ -264,7 +283,7 @@ function RouteComponent() {
               </div>
               <FieldGroup>
                 <FieldContent>
-                  <ProductsTable products={fields} onDelete={handleDeleteProduct} />
+                  <ProductsTable products={fields} onDelete={handleDeleteProduct} onUpdate={handleUpdateProduct} currency={selectedCurrency} />
                 </FieldContent>
               </FieldGroup>
             </FieldSet>

@@ -12,12 +12,15 @@ import { useTenantSettingsService } from '@/services/tenantSettingsService'
 import { useTenantSettingsStore } from '@/stores/tenantSettingsStore'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { createFileRoute } from '@tanstack/react-router'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { SettingsIcon } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { FormTextarea } from '@/components/form/FormTextarea'
+import { useCurrencyService } from '@/services/currencyService'
+import { useCurrencyStore } from '@/stores/currencyStore'
+import { DEFAULT_CURRENCY_CODE, mapCurrenciesToSelectOptions } from '@/lib/currency'
 
 export const Route = createFileRoute('/dashboard/settings/')({
   component: RouteComponent,
@@ -31,7 +34,8 @@ const breadcrumb: BreadcrumbItemType[] = [
 ]
 
 const SHOW_LOGO_URL = false;
-const SHOW_REGIONAL_SETTINGS = false;
+const SHOW_REGIONAL_SETTINGS = true;
+const SHOW_LOCALE_SELECT = false;
 
 const templateOptions = [
   { value: 'classic', label: 'Clásico' },
@@ -44,21 +48,17 @@ const localeOptions = [
   { value: 'en', label: 'English' },
 ]
 
-const currencyOptions = [
-  { value: 'USD', label: 'USD - Dólar estadounidense' },
-  { value: 'EUR', label: 'EUR - Euro' },
-  { value: 'MXN', label: 'MXN - Peso mexicano' },
-  { value: 'COP', label: 'COP - Peso colombiano' },
-  { value: 'ARS', label: 'ARS - Peso argentino' },
-  { value: 'CLP', label: 'CLP - Peso chileno' },
-  { value: 'PEN', label: 'PEN - Sol peruano' },
-]
-
 function RouteComponent() {
   useDocumentTitle('Configuración');
   const { get, update, loading } = useTenantSettingsService();
+  const { list: listCurrencies } = useCurrencyService();
   const setTenantSettings = useTenantSettingsStore(state => state.setSettings);
+  const currencies = useCurrencyStore(state => state.currencies);
+  const hasLoadedCurrencies = useCurrencyStore(state => state.hasLoaded);
+  const setCurrencies = useCurrencyStore(state => state.setCurrencies);
+  const setCurrenciesLoaded = useCurrencyStore(state => state.setHasLoaded);
   const [initialLoading, setInitialLoading] = useState(true);
+  const currencyOptions = useMemo(() => mapCurrenciesToSelectOptions(currencies), [currencies]);
 
   const form = useForm<TenantSettingsForm>({
     defaultValues: {
@@ -67,7 +67,7 @@ function RouteComponent() {
       primary_color: '#3B82F6',
       secondary_color: '#1E40AF',
       template: 'classic',
-      currency: 'USD',
+      currency: DEFAULT_CURRENCY_CODE,
       locale: 'es',
       quotation: {
         notes_default: '',
@@ -86,6 +86,20 @@ function RouteComponent() {
   });
 
   useEffect(() => {
+    if (hasLoadedCurrencies) return;
+
+    listCurrencies()
+      .then((response) => {
+        setCurrencies(response.data.currencies ?? []);
+        setCurrenciesLoaded(true);
+      })
+      .catch(() => {
+        setCurrenciesLoaded(true);
+        toast.error('No se pudo cargar el catálogo de monedas');
+      });
+  }, [hasLoadedCurrencies, listCurrencies, setCurrencies, setCurrenciesLoaded]);
+
+  useEffect(() => {
     get().then(response => {
       const settings = response.data.settings;
       setTenantSettings(settings);
@@ -95,7 +109,7 @@ function RouteComponent() {
         primary_color: settings.primary_color || '#3B82F6',
         secondary_color: settings.secondary_color || '#1E40AF',
         template: (settings.template?.replace('template-', '') as 'classic' | 'executive' | 'modern') || 'classic',
-        currency: settings.currency || 'USD',
+        currency: settings.currency || DEFAULT_CURRENCY_CODE,
         locale: settings.locale || 'es',
         quotation: {
           notes_default: settings.quotation?.notes_default || '',
@@ -225,19 +239,28 @@ function RouteComponent() {
         {SHOW_REGIONAL_SETTINGS && (
           <Card>
             <CardHeader>
-              <CardTitle>Preferencias Regionales</CardTitle>
-              <CardDescription>Configura el idioma y la moneda predeterminada</CardDescription>
+              <CardTitle>
+                <div className="flex items-center gap-2">
+                  <span>Preferencias Regionales</span>
+                  <span className="bg-primary text-primary-foreground text-[10px] font-bold px-1.5 py-0.5 rounded-full uppercase tracking-wider">
+                    Nuevo
+                  </span>
+                </div>
+              </CardTitle>
+              <CardDescription>Configura la moneda predeterminada</CardDescription>
             </CardHeader>
             <CardContent>
               <div className='grid md:grid-cols-2 gap-4'>
-                <FormSelect
-                  name='locale'
-                  control={form.control}
-                  label='Idioma'
-                  options={localeOptions}
-                  optionLabel='label'
-                  optionValue='value'
-                />
+                {SHOW_LOCALE_SELECT && (
+                  <FormSelect
+                    name='locale'
+                    control={form.control}
+                    label='Idioma'
+                    options={localeOptions}
+                    optionLabel='label'
+                    optionValue='value'
+                  />
+                )}
                 <FormSelect
                   name='currency'
                   control={form.control}

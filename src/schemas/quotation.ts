@@ -29,6 +29,7 @@ export const quotationSchema = z.object({
         .number()
         .int()
         .positive("Debes seleccionar una fecha de vencimiento"),
+    currency: z.string().length(3, "La moneda es obligatoria"),
 
     temporary_logo: z.string().optional().nullable(),
     use_tenant_logo: z.boolean().optional(),
@@ -46,7 +47,6 @@ export const quotationSchema = z.object({
         phone: z.string().optional(),
         })
         .optional(),
-    code : z.string().min(1, "El codigo de pais es obligatorio"),
 
     client: z
         .object({

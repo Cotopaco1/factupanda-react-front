@@ -10,7 +10,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog'
 
-const announcementDate = '3/23/2026'
+const announcementDate = '4/19/2026'
 
 export function UpdatesDialog() {
   const [open, setOpen] = useState(false)
@@ -30,24 +30,22 @@ export function UpdatesDialog() {
             Anuncios <span className='text-sm font-normal text-muted-foreground'>{announcementDate}</span>
           </DialogTitle>
           <DialogDescription className='text-sm leading-6'>
-            Compartimos una mejora reciente en la infraestructura de la plataforma.
+            Compartimos una mejora reciente en la creación y configuración de cotizaciones.
           </DialogDescription>
         </DialogHeader>
         <div className='grid gap-4 text-base leading-7 text-foreground'>
           <p>
-            Hemos migrado parte de nuestros servicios con el objetivo de mejorar
-            el rendimiento general de la plataforma y responder mejor al
-            crecimiento del tráfico.
+            Ahora puedes elegir la moneda al crear una cotización usando un
+            catálogo centralizado de divisas.
           </p>
           <p>
-            En algunos momentos, ese aumento de visitas podía hacer que ciertas
-            páginas se sintieran lentas e incluso presentaran fallos
-            intermitentes. Con esta actualización buscamos una experiencia más
-            estable, rápida y confiable.
+            También habilitamos la moneda predeterminada dentro de la
+            configuración de tu empresa para reutilizarla en futuras
+            cotizaciones.
           </p>
           <p className='font-medium text-muted-foreground'>
-            Son problemas que, en el fondo, también nos alegran: significan que
-            cada vez más personas están usando FactuPanda.
+            Los montos ahora respetan mejor el formato decimal según la moneda
+            seleccionada.
           </p>
         </div>
       </DialogContent>

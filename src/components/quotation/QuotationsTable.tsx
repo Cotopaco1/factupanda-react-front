@@ -41,6 +41,7 @@ export function QuotationsTable({ page, perPage }: QuotationsTableProps) {
   const [pdfViewOpen, setPdfViewOpen] = useState(false);
   const [pdfUrl, setPdfUrl] = useState('');
   const [selectedQuotationId, setSelectedQuotationId] = useState<number | null>(null);
+  const [selectedQuotationCurrency, setSelectedQuotationCurrency] = useState<string | undefined>();
   const [pdfLoading, setPdfLoading] = useState(false);
 
   const handleDeleteClick = (id: number) => {
@@ -60,8 +61,9 @@ export function QuotationsTable({ page, perPage }: QuotationsTableProps) {
     });
   }
 
-  const handlePdfClick = (quotationId: number) => {
+  const handlePdfClick = (quotationId: number, currency: string) => {
     setSelectedQuotationId(quotationId);
+    setSelectedQuotationCurrency(currency);
     setPdfOptionsOpen(true);
   }
 
@@ -152,7 +154,7 @@ export function QuotationsTable({ page, perPage }: QuotationsTableProps) {
             <TableRow key={quotation.id}>
               <TableCell>
                 <div className="flex items-center gap-2">
-                  <button type="button" onClick={() => handlePdfClick(quotation.id)} title="Generar PDF">
+                  <button type="button" onClick={() => handlePdfClick(quotation.id, quotation.currency)} title="Generar PDF">
                     <FileTextIcon className="cursor-pointer hover:text-primary transition-colors h-4 w-4" />
                   </button>
                   <Link to="/dashboard/quotations/$id/edit" params={{ id: String(quotation.id) }}>
@@ -186,6 +188,7 @@ export function QuotationsTable({ page, perPage }: QuotationsTableProps) {
         setOpen={setPdfOptionsOpen}
         onGenerate={handleGeneratePdf}
         loading={pdfLoading}
+        initialCurrency={selectedQuotationCurrency}
       />
       <DialogPdfQuotation
         open={pdfViewOpen}

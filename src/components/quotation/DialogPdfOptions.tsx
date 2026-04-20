@@ -9,12 +9,16 @@ import { useForm } from "react-hook-form";
 import type { GeneratePdfPayload } from "@/types/quotation";
 import { useTenantSettingsStore } from "@/stores/tenantSettingsStore";
 import { toast } from "sonner";
+import { useCurrencyService } from "@/services/currencyService";
+import { useCurrencyStore } from "@/stores/currencyStore";
+import { DEFAULT_CURRENCY_CODE, mapCurrenciesToSelectOptions } from "@/lib/currency";
 
 interface Props {
     open: boolean;
     setOpen: React.Dispatch<React.SetStateAction<boolean>>;
     onGenerate: (options: GeneratePdfPayload) => void;
     loading: boolean;
+    initialCurrency?: string;
 }
 
 const templateOptions = [
@@ -23,29 +27,50 @@ const templateOptions = [
     { value: 'modern', label: 'Moderno' },
 ];
 
-export function DialogPdfOptions({ open, setOpen, onGenerate, loading }: Props) {
+export function DialogPdfOptions({ open, setOpen, onGenerate, loading, initialCurrency }: Props) {
     const tenantSettings = useTenantSettingsStore((state) => state.settings);
+    const { list: listCurrencies } = useCurrencyService();
+    const currencies = useCurrencyStore((state) => state.currencies);
+    const hasLoadedCurrencies = useCurrencyStore((state) => state.hasLoaded);
+    const setCurrencies = useCurrencyStore((state) => state.setCurrencies);
+    const setCurrenciesLoaded = useCurrencyStore((state) => state.setHasLoaded);
     const hasTenantLogo = Boolean(tenantSettings?.logo?.url);
+    const currencyOptions = mapCurrenciesToSelectOptions(currencies);
     const { control, handleSubmit, reset, watch, setValue } = useForm<GeneratePdfPayload>({
         defaultValues: {
             template: 'classic',
             primaryColor: '#000000',
             secundaryColor: '#666666',
             use_tenant_logo: false,
+            currency: initialCurrency || tenantSettings?.currency || DEFAULT_CURRENCY_CODE,
         }
     });
 
     useEffect(() => {
+        if (hasLoadedCurrencies) return;
+
+        listCurrencies()
+            .then((response) => {
+                setCurrencies(response.data.currencies ?? []);
+                setCurrenciesLoaded(true);
+            })
+            .catch(() => {
+                setCurrenciesLoaded(true);
+                toast.error('No se pudo cargar el catálogo de monedas');
+            });
+    }, [hasLoadedCurrencies, listCurrencies, setCurrencies, setCurrenciesLoaded]);
+
+    useEffect(() => {
         if (!open) return;
-        if (!tenantSettings) return;
-        const template = (tenantSettings.template?.replace('template-', '') as 'classic' | 'executive' | 'modern') || 'classic'
+        const template = (tenantSettings?.template?.replace('template-', '') as 'classic' | 'executive' | 'modern') || 'classic'
         reset({
             template,
-            primaryColor: tenantSettings.primary_color || '#000000',
-            secundaryColor: tenantSettings.secondary_color || '#666666',
+            primaryColor: tenantSettings?.primary_color || '#000000',
+            secundaryColor: tenantSettings?.secondary_color || '#666666',
             use_tenant_logo: false,
+            currency: initialCurrency || tenantSettings?.currency || DEFAULT_CURRENCY_CODE,
         })
-    }, [open, reset, tenantSettings]);
+    }, [initialCurrency, open, reset, tenantSettings]);
 
     const onSubmit = (data: GeneratePdfPayload) => {
         onGenerate(data);
@@ -63,6 +88,14 @@ export function DialogPdfOptions({ open, setOpen, onGenerate, loading }: Props) 
                         control={control}
                         name="template"
                         options={templateOptions}
+                        optionLabel="label"
+                        optionValue="value"
+                    />
+                    <FormSelect
+                        label="Moneda"
+                        control={control}
+                        name="currency"
+                        options={currencyOptions}
                         optionLabel="label"
                         optionValue="value"
                     />

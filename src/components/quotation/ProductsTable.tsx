@@ -11,6 +11,8 @@ import { QuotationDTO } from "@/services/productService"
 import { PencilIcon, TrashIcon } from "lucide-react"
 import { DialogEditQuotationProduct } from "@/components/quotation/DialogEditQuotationProduct"
 import { useState } from "react"
+import type { Currency } from "@/types/currency"
+import { formatDecimalAmount, formatMoney } from "@/lib/currency"
 
 const columns = [
   'Nombre', 'Descripción', 'Unidad de medida', 'Precio Unitario',
@@ -21,9 +23,10 @@ interface Props {
     products : ProductForm[],
     onDelete : (index : number) => void,
     onUpdate : (index : number, data: ProductForm) => void,
+    currency?: Currency,
 }
 
-export function ProductsTable({products, onDelete, onUpdate}:Props) {
+export function ProductsTable({products, onDelete, onUpdate, currency}:Props) {
 
   const [editOpen, setEditOpen] = useState(false);
   const [editIndex, setEditIndex] = useState<number | null>(null);
@@ -86,12 +89,12 @@ export function ProductsTable({products, onDelete, onUpdate}:Props) {
             <TableCell>{product.name}</TableCell>
             <TableCell>{product.description}</TableCell>
             <TableCell>{product.unit_of_measurement}</TableCell>
-            <TableCell>{Number(product.unit_price)}</TableCell>
+            <TableCell>{formatDecimalAmount(Number(product.unit_price), { currency })}</TableCell>
             <TableCell>{Number(product.quantity)}</TableCell>
             <TableCell>{Number(product.discount_percentage ?? 0)}</TableCell>
             <TableCell>{Number(product.tax_percentage ?? 0)}</TableCell>
             {/* <TableCell>{ product.quantity && product.unit_price ? calculateProductTotal(product) : 0 }</TableCell> */}
-             <TableCell>${ product.quantity && product.unit_price ? quotationDto.calculateProductTotal(product).total.toLocaleString() : 0 }</TableCell>
+             <TableCell>{product.quantity && product.unit_price ? formatDecimalAmount(quotationDto.calculateProductTotal(product).total, { currency }) : formatDecimalAmount(0, { currency })}</TableCell>
           </TableRow>
         ))}
       </TableBody>
@@ -103,23 +106,23 @@ export function ProductsTable({products, onDelete, onUpdate}:Props) {
             <TableBody>
               <TableRow>
                 <TableCell className="font-bold">Base : </TableCell>
-                <TableCell>${quotationDto.baseAmount.toLocaleString()}</TableCell>
+                <TableCell>{formatMoney(quotationDto.baseAmount, { currency, currencyCode: currency?.code })}</TableCell>
               </TableRow>
               <TableRow>
                 <TableCell className="font-bold">Descuento : </TableCell>
-                <TableCell>${quotationDto.discountAmount.toLocaleString()}</TableCell>
+                <TableCell>{formatMoney(quotationDto.discountAmount, { currency, currencyCode: currency?.code })}</TableCell>
               </TableRow>
               <TableRow>
                 <TableCell className="font-bold">Subtotal : </TableCell>
-                <TableCell>${quotationDto.subTotal.toLocaleString()}</TableCell>
+                <TableCell>{formatMoney(quotationDto.subTotal, { currency, currencyCode: currency?.code })}</TableCell>
               </TableRow>
               <TableRow>
                 <TableCell className="font-bold">Impuesto : </TableCell>
-                <TableCell>${quotationDto.taxAmount.toLocaleString()}</TableCell>
+                <TableCell>{formatMoney(quotationDto.taxAmount, { currency, currencyCode: currency?.code })}</TableCell>
               </TableRow>
               <TableRow>
                 <TableCell className="font-bold">Total : </TableCell>
-                <TableCell>${quotationDto.total.toLocaleString()}</TableCell>
+                <TableCell>{formatMoney(quotationDto.total, { currency, currencyCode: currency?.code })}</TableCell>
               </TableRow>
             </TableBody>
           </Table>

@@ -6,6 +6,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useQuotationService } from '@/services/quotationService';
 import { useTenantSettingsService } from '@/services/tenantSettingsService';
 import { useTenantSettingsStore } from '@/stores/tenantSettingsStore';
+import { useCurrencyStore } from '@/stores/currencyStore';
 import { InfoTooltip } from '@/components/ui/InfoTooltip';
 import type { DueDates } from '@/types/quotation'
 import { FieldSet, FieldLegend, FieldGroup, FieldContent, FieldLabel, FieldError } from "@/components/ui/field"
@@ -34,11 +35,13 @@ import { useBannerAlertService } from '@/services/bannerAlerts'
 import { toast } from 'sonner'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Switch } from '@/components/ui/switch'
+import { useCurrencyService } from '@/services/currencyService';
+import { DEFAULT_CURRENCY_CODE, findCurrencyByCode, mapCurrenciesToSelectOptions } from '@/lib/currency';
 
 type FormValues = z.infer<typeof quotationSchema>
 
 type ChangeItem = {
-  section: 'Empresa' | 'Notas y terminos' | 'Apariencia'
+  section: 'Empresa' | 'Notas y terminos' | 'Apariencia' | 'Cotizacion'
   label: string
   current: string
   next: string
@@ -66,7 +69,7 @@ const templateOptions = [
 ];
 
 const DEFAULT_COMPANY = {name: "", address: "", city: "", fiscal_number: "", email: "", phone: ""}
-const DEFAULT_CUSTOMIZATION = { primaryColor : '#3ab8eb', secundaryColor : '#3ab8eb', template: 'classic' }
+const DEFAULT_CUSTOMIZATION = { primaryColor : '#3ab8eb', secundaryColor : '#3ab8eb', template: 'classic', currency: DEFAULT_CURRENCY_CODE }
 const DEFAULT_EXTRAS = { notes: '', terms: '' }
 
 const retreiveCompanyData = (useLocalDefaults = true) => {
@@ -77,7 +80,7 @@ const retreiveCompanyData = (useLocalDefaults = true) => {
       DEFAULT_COMPANY;
 }
 
-const retreiveCustomizationSettings = (useLocalDefaults = true) : {primaryColor : string, secundaryColor : string, template: string} => {
+const retreiveCustomizationSettings = (useLocalDefaults = true) : {primaryColor : string, secundaryColor : string, template: string, currency: string} => {
   if (!useLocalDefaults) return DEFAULT_CUSTOMIZATION;
   const customizationSettings = localStorage.getItem('quotation.customization');
   if (!customizationSettings) return DEFAULT_CUSTOMIZATION;
@@ -86,6 +89,7 @@ const retreiveCustomizationSettings = (useLocalDefaults = true) : {primaryColor 
     primaryColor: parsed.primaryColor ?? DEFAULT_CUSTOMIZATION.primaryColor,
     secundaryColor: parsed.secundaryColor ?? DEFAULT_CUSTOMIZATION.secundaryColor,
     template: parsed.template ?? DEFAULT_CUSTOMIZATION.template,
+    currency: parsed.currency ?? DEFAULT_CUSTOMIZATION.currency,
   };
 }
 
@@ -105,7 +109,7 @@ const normalizeTemplate = (template?: string | null) => {
   return template.replace('template-', '');
 }
 
-const retreiveQuotationDefaultValues = (useLocalDefaults = true) : FormValues => {
+const retreiveQuotationDefaultValues = (useLocalDefaults = true, tenantCurrency?: string | null) : FormValues => {
   const customizationSettings = retreiveCustomizationSettings(useLocalDefaults);
   const extraSettings = retreiveExtraSettings(useLocalDefaults);
   const todayDate = new Date();
@@ -114,6 +118,7 @@ const retreiveQuotationDefaultValues = (useLocalDefaults = true) : FormValues =>
         number: "",
         date: today,
         due_date_id: 0,
+        currency: customizationSettings.currency || tenantCurrency || DEFAULT_CURRENCY_CODE,
         company: retreiveCompanyData(useLocalDefaults),
         client: {
           name: "",
@@ -126,7 +131,6 @@ const retreiveQuotationDefaultValues = (useLocalDefaults = true) : FormValues =>
         products : [],
         temporary_logo : '',
         use_tenant_logo: false,
-        code : 'en-US',
         notes : extraSettings.notes,
         terms : extraSettings.terms,
         ... customizationSettings
@@ -137,9 +141,14 @@ function RouteComponent() {
   useDocumentTitle('Crear Cotización');
   const isLogin = useUserStore(state => state.isLogin);
   const { get: getTenantSettings } = useTenantSettingsService();
+  const { list: listCurrencies } = useCurrencyService();
   const tenantSettings = useTenantSettingsStore(state => state.settings);
   const hasTenantLogo = Boolean(tenantSettings?.logo?.url);
   const setTenantSettings = useTenantSettingsStore(state => state.setSettings);
+  const currencies = useCurrencyStore(state => state.currencies);
+  const hasLoadedCurrencies = useCurrencyStore(state => state.hasLoaded);
+  const setCurrencies = useCurrencyStore(state => state.setCurrencies);
+  const setCurrenciesLoaded = useCurrencyStore(state => state.setHasLoaded);
   const [loadingTenantSettings, setLoadingTenantSettings] = useState(false);
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
   const [confirmDialogTitle, setConfirmDialogTitle] = useState('');
@@ -147,7 +156,7 @@ function RouteComponent() {
   const [pendingApply, setPendingApply] = useState<(() => void) | null>(null);
   const [showSettingsShortcut, setShowSettingsShortcut] = useState(false);
 
-  const defaultValues = useMemo(()=>retreiveQuotationDefaultValues(true), []);
+  const defaultValues = useMemo(() => retreiveQuotationDefaultValues(true, tenantSettings?.currency), [tenantSettings?.currency]);
    const form = useForm<FormValues>({
       defaultValues: defaultValues,
     resolver : zodResolver(quotationSchema) as Resolver<FormValues>
@@ -166,6 +175,18 @@ function RouteComponent() {
   const {createQuotation, getDueDates , loading:quotationLoading} = useQuotationService();
   const [dueDates, setDueDates] = useState<DueDates[]|[]>([]);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const currencyOptions = useMemo(() => mapCurrenciesToSelectOptions(currencies), [currencies]);
+  const selectedCurrencyCode = form.watch('currency');
+  const selectedCurrency = useMemo(
+    () => findCurrencyByCode(currencies, selectedCurrencyCode),
+    [currencies, selectedCurrencyCode]
+  );
+
+  useEffect(() => {
+    if (form.formState.isDirty) return;
+    form.reset(defaultValues);
+  }, [defaultValues, form, form.formState.isDirty]);
+
   const onSubmit = (data : FormValues) => {
     console.log(data);
     createQuotation(data)
@@ -174,7 +195,7 @@ function RouteComponent() {
       setPdfOpen(true);
       try{
         localStorage.setItem('quotation.company', JSON.stringify(data.company))
-        localStorage.setItem('quotation.customization', JSON.stringify({primaryColor : data.primaryColor, secundaryColor : data.secundaryColor, template: data.template}))
+        localStorage.setItem('quotation.customization', JSON.stringify({primaryColor : data.primaryColor, secundaryColor : data.secundaryColor, template: data.template, currency: data.currency}))
         localStorage.setItem('quotation.extras', JSON.stringify({notes: data.notes, terms: data.terms}))
       }catch(error){
         console.log("An error ocurred during saving default values",error )
@@ -209,6 +230,20 @@ function RouteComponent() {
     });
   }, []);
 
+  useEffect(() => {
+    if (hasLoadedCurrencies) return;
+
+    listCurrencies()
+      .then((response) => {
+        setCurrencies(response.data.currencies ?? []);
+        setCurrenciesLoaded(true);
+      })
+      .catch(() => {
+        setCurrenciesLoaded(true);
+        toast.error('No se pudo cargar el catálogo de monedas');
+      });
+  }, [hasLoadedCurrencies, listCurrencies, setCurrencies, setCurrenciesLoaded]);
+
   const applyCompanyToForm = (company: {name?: string, address?: string, city?: string, fiscal_number?: string, email?: string, phone?: string}) => {
     form.setValue('company.name', company?.name ?? '')
     form.setValue('company.address', company?.address ?? '')
@@ -225,6 +260,7 @@ function RouteComponent() {
     primaryColor: string,
     secundaryColor: string,
     template: string,
+    currency: string,
   }) => {
     const normalizeForCompare = (value?: string | null) => (value ?? '').trim();
     const normalizeForDisplay = (value?: string | null) => (value ?? '').trim() || 'Sin valor';
@@ -243,6 +279,7 @@ function RouteComponent() {
       primaryColor: form.getValues('primaryColor') ?? '',
       secundaryColor: form.getValues('secundaryColor') ?? '',
       template: form.getValues('template') ?? '',
+      currency: form.getValues('currency') ?? '',
     };
 
     const changes: ChangeItem[] = [];
@@ -267,6 +304,7 @@ function RouteComponent() {
     pushChange('Apariencia', 'Color principal', current.primaryColor, nextValues.primaryColor);
     pushChange('Apariencia', 'Color secundario', current.secundaryColor, nextValues.secundaryColor);
     pushChange('Apariencia', 'Plantilla', current.template, nextValues.template);
+    pushChange('Cotizacion', 'Moneda', current.currency, nextValues.currency);
 
     return changes;
   }
@@ -278,6 +316,7 @@ function RouteComponent() {
     primaryColor: string,
     secundaryColor: string,
     template: string,
+    currency: string,
   }, title: string, applyLabel: string, options?: { showSettingsShortcut?: boolean }) => {
     const changes = buildChanges(nextValues);
     if (!changes.length) {
@@ -295,6 +334,7 @@ function RouteComponent() {
       form.setValue('primaryColor', nextValues.primaryColor);
       form.setValue('secundaryColor', nextValues.secundaryColor);
       form.setValue('template', nextValues.template);
+      form.setValue('currency', nextValues.currency);
       toast.success(applyLabel);
     });
     setConfirmDialogOpen(true);
@@ -326,6 +366,7 @@ function RouteComponent() {
         primaryColor: settings.primary_color || DEFAULT_CUSTOMIZATION.primaryColor,
         secundaryColor: settings.secondary_color || DEFAULT_CUSTOMIZATION.secundaryColor,
         template: normalizeTemplate(settings.template),
+        currency: settings.currency || DEFAULT_CURRENCY_CODE,
       }, 'Confirmar carga desde Empresa', 'Datos de la Empresa cargados', { showSettingsShortcut: true });
     } catch (error) {
       console.error('Error loading tenant settings', error)
@@ -354,6 +395,7 @@ function RouteComponent() {
       primaryColor: customization.primaryColor,
       secundaryColor: customization.secundaryColor,
       template: customization.template,
+      currency: customization.currency || form.getValues('currency') || tenantSettings?.currency || DEFAULT_CURRENCY_CODE,
     }, 'Confirmar carga desde almacenamiento local', 'Datos locales cargados');
   }
 
@@ -399,7 +441,7 @@ function RouteComponent() {
               </DialogDescription>
             </DialogHeader>
             <div className='grid gap-4 max-h-[420px] overflow-y-auto pr-1'>
-              {(['Empresa', 'Notas y terminos', 'Apariencia'] as ChangeItem['section'][]).map((section) => {
+              {(['Cotizacion', 'Empresa', 'Notas y terminos', 'Apariencia'] as ChangeItem['section'][]).map((section) => {
                 const sectionChanges = pendingChanges.filter((item) => item.section === section);
                 if (!sectionChanges.length) return null;
                 return (
@@ -478,6 +520,21 @@ function RouteComponent() {
                 optionLabel='name'
                 optionValue='unique_id'
                 label='Fecha de vencimiento'
+              />
+              <FormSelect
+                name="currency"
+                control={form.control}
+                options={currencyOptions}
+                optionLabel='label'
+                optionValue='value'
+                label={
+                  <div className="flex items-center gap-2">
+                    <span>Moneda</span>
+                    <span className="bg-primary text-primary-foreground text-[10px] font-bold px-1.5 py-0.5 rounded-full uppercase tracking-wider">
+                      Nuevo
+                    </span>
+                  </div>
+                }
               />
             </FieldGroup>
           </FieldSet>
@@ -571,7 +628,8 @@ function RouteComponent() {
             </div>
             <FieldGroup>
               <FieldContent>
-              <ProductsTable products={fields} onDelete={handleDeleteProduct} onUpdate={handleUpdateProduct} />
+              <ProductsTable products={fields} onDelete={handleDeleteProduct} onUpdate={handleUpdateProduct} currency={selectedCurrency} />
+              
               </FieldContent>
             </FieldGroup>
           </FieldSet>
