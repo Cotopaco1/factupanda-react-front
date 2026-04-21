@@ -189,6 +189,7 @@ export function QuotationsTable({ page, perPage }: QuotationsTableProps) {
         onGenerate={handleGeneratePdf}
         loading={pdfLoading}
         initialCurrency={selectedQuotationCurrency}
+        hideCurrencySelect
       />
       <DialogPdfQuotation
         open={pdfViewOpen}

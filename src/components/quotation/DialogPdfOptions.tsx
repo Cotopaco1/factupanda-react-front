@@ -19,6 +19,7 @@ interface Props {
     onGenerate: (options: GeneratePdfPayload) => void;
     loading: boolean;
     initialCurrency?: string;
+    hideCurrencySelect?: boolean;
 }
 
 const templateOptions = [
@@ -27,7 +28,7 @@ const templateOptions = [
     { value: 'modern', label: 'Moderno' },
 ];
 
-export function DialogPdfOptions({ open, setOpen, onGenerate, loading, initialCurrency }: Props) {
+export function DialogPdfOptions({ open, setOpen, onGenerate, loading, initialCurrency, hideCurrencySelect = false }: Props) {
     const tenantSettings = useTenantSettingsStore((state) => state.settings);
     const { list: listCurrencies } = useCurrencyService();
     const currencies = useCurrencyStore((state) => state.currencies);
@@ -91,14 +92,16 @@ export function DialogPdfOptions({ open, setOpen, onGenerate, loading, initialCu
                         optionLabel="label"
                         optionValue="value"
                     />
-                    <FormSelect
-                        label="Moneda"
-                        control={control}
-                        name="currency"
-                        options={currencyOptions}
-                        optionLabel="label"
-                        optionValue="value"
-                    />
+                    {!hideCurrencySelect && (
+                        <FormSelect
+                            label="Moneda"
+                            control={control}
+                            name="currency"
+                            options={currencyOptions}
+                            optionLabel="label"
+                            optionValue="value"
+                        />
+                    )}
                     <div className="flex gap-4">
                         <FormColorInput
                             label="Color primario"
