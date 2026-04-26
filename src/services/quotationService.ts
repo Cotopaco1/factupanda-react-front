@@ -2,11 +2,17 @@ import { apiClient } from "@/lib/apiClient";
 import type { LaravelPaginator } from "@/types/paginator";
 import type { GeneratePdfPayload, QuotationDetail, QuotationListItem, QuotationUpdatePayload } from "@/types/quotation";
 import type { ApiResponse } from "@/types/responses";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 
 export type QuotationsListFilters = {
     per_page?: number;
     page?: number;
+}
+
+type BlobErrorResponse = {
+    response?: {
+        data?: unknown;
+    };
 }
 
 export const useQuotationService = () => {
@@ -22,36 +28,40 @@ export const useQuotationService = () => {
         }
     }
 
-    const createQuotation = async (data: any) : Promise<Blob> => {
+    const parseBlobErrorResponse = async (error: unknown) => {
+        const possibleError = error as BlobErrorResponse;
+        if (possibleError.response?.data instanceof Blob) {
+            try {
+                const text = await possibleError.response.data.text();
+                possibleError.response.data = JSON.parse(text);
+            } catch {
+                possibleError.response.data = {
+                    message: "Error al procesar la respuesta del servidor"
+                };
+            }
+        }
+    }
+
+    const createQuotation = async (data: unknown) : Promise<Blob> => {
         setLoading(true);
         try {
             const response = await apiClient.post('/quotations', data, { responseType : 'blob'});
             return response.data;
-        } catch (error: any) {
-            if (error.response?.data instanceof Blob) {
-                try {
-                    const text = await error.response.data.text();
-                    error.response.data = JSON.parse(text);
-                } catch (parseError) {
-                    console.error("Failed to parse error response:", parseError);
-                    error.response.data = {
-                        message: "Error al procesar la respuesta del servidor"
-                    };
-                }
-            }
+        } catch (error: unknown) {
+            await parseBlobErrorResponse(error);
             throw error;
         } finally {
             setLoading(false);
         }
     }
 
-    const getDueDates = () => {
+    const getDueDates = useCallback(() => {
         setLoading(true);
         return apiClient.get('/due_dates')
         .then((response) => {
             return response.data?.due_dates ?? null;
         }).finally(()=> setLoading(false))
-    }
+    }, []);
 
     const list = (filters: QuotationsListFilters = {}) => {
         return handleFetch(async () => {
@@ -90,17 +100,8 @@ export const useQuotationService = () => {
                 { responseType: 'blob' }
             );
             return response.data;
-        } catch (error: any) {
-            if (error.response?.data instanceof Blob) {
-                try {
-                    const text = await error.response.data.text();
-                    error.response.data = JSON.parse(text);
-                } catch (parseError) {
-                    error.response.data = {
-                        message: "Error al procesar la respuesta del servidor"
-                    };
-                }
-            }
+        } catch (error: unknown) {
+            await parseBlobErrorResponse(error);
             throw error;
         } finally {
             setLoading(false);

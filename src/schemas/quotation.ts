@@ -23,8 +23,8 @@ export const quotationSchema = z.object({
         .string()
         .min(1, "La fecha es obligatoria"),
 
-    // El select devuelve string, pero tus opciones tienen value numérico.
-    // Coercemos a number para que Zod convierta "1" -> 1
+    // El select devuelve string, pero tus opciones tienen value numerico.
+    // Coercemos a number para que Zod convierta "1" -> 1.
     due_date_id: z.coerce
         .number()
         .int()

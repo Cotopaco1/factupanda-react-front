@@ -72,19 +72,29 @@ const DEFAULT_COMPANY = {name: "", address: "", city: "", fiscal_number: "", ema
 const DEFAULT_CUSTOMIZATION = { primaryColor : '#3ab8eb', secundaryColor : '#3ab8eb', template: 'classic', currency: DEFAULT_CURRENCY_CODE }
 const DEFAULT_EXTRAS = { notes: '', terms: '' }
 
+const parseLocalStorageJson = <T,>(key: string): T | null => {
+  const rawValue = localStorage.getItem(key);
+  if (!rawValue) return null;
+
+  try {
+    return JSON.parse(rawValue) as T;
+  } catch (error) {
+    console.error(`Invalid local storage payload for ${key}`, error);
+    localStorage.removeItem(key);
+    return null;
+  }
+}
+
 const retreiveCompanyData = (useLocalDefaults = true) => {
     if (!useLocalDefaults) return DEFAULT_COMPANY;
-    const company = localStorage.getItem('quotation.company');
-    return company ?
-      { ...DEFAULT_COMPANY, ...JSON.parse(company) } :
-      DEFAULT_COMPANY;
+    const company = parseLocalStorageJson<Partial<typeof DEFAULT_COMPANY>>('quotation.company');
+    return company ? { ...DEFAULT_COMPANY, ...company } : DEFAULT_COMPANY;
 }
 
 const retreiveCustomizationSettings = (useLocalDefaults = true) : {primaryColor : string, secundaryColor : string, template: string, currency: string} => {
   if (!useLocalDefaults) return DEFAULT_CUSTOMIZATION;
-  const customizationSettings = localStorage.getItem('quotation.customization');
-  if (!customizationSettings) return DEFAULT_CUSTOMIZATION;
-  const parsed = JSON.parse(customizationSettings);
+  const parsed = parseLocalStorageJson<Partial<typeof DEFAULT_CUSTOMIZATION>>('quotation.customization');
+  if (!parsed) return DEFAULT_CUSTOMIZATION;
   return {
     primaryColor: parsed.primaryColor ?? DEFAULT_CUSTOMIZATION.primaryColor,
     secundaryColor: parsed.secundaryColor ?? DEFAULT_CUSTOMIZATION.secundaryColor,
@@ -95,9 +105,8 @@ const retreiveCustomizationSettings = (useLocalDefaults = true) : {primaryColor 
 
 const retreiveExtraSettings = (useLocalDefaults = true) : {notes: string, terms: string} => {
   if (!useLocalDefaults) return DEFAULT_EXTRAS;
-  const extraSettings = localStorage.getItem('quotation.extras');
-  if (!extraSettings) return DEFAULT_EXTRAS;
-  const parsed = JSON.parse(extraSettings);
+  const parsed = parseLocalStorageJson<Partial<typeof DEFAULT_EXTRAS>>('quotation.extras');
+  if (!parsed) return DEFAULT_EXTRAS;
   return {
     notes: parsed.notes ?? DEFAULT_EXTRAS.notes,
     terms: parsed.terms ?? DEFAULT_EXTRAS.terms,
@@ -114,11 +123,12 @@ const retreiveQuotationDefaultValues = (useLocalDefaults = true, tenantCurrency?
   const extraSettings = retreiveExtraSettings(useLocalDefaults);
   const todayDate = new Date();
   const today = `${todayDate.getFullYear()}-${String(todayDate.getMonth() + 1).padStart(2, '0')}-${String(todayDate.getDate()).padStart(2, '0')}`;
+  const currency = customizationSettings.currency || tenantCurrency || DEFAULT_CURRENCY_CODE;
   return {
         number: "",
         date: today,
         due_date_id: 0,
-        currency: customizationSettings.currency || tenantCurrency || DEFAULT_CURRENCY_CODE,
+        currency,
         company: retreiveCompanyData(useLocalDefaults),
         client: {
           name: "",
@@ -133,7 +143,9 @@ const retreiveQuotationDefaultValues = (useLocalDefaults = true, tenantCurrency?
         use_tenant_logo: false,
         notes : extraSettings.notes,
         terms : extraSettings.terms,
-        ... customizationSettings
+        primaryColor: customizationSettings.primaryColor,
+        secundaryColor: customizationSettings.secundaryColor,
+        template: customizationSettings.template,
   }
 }
 
@@ -171,7 +183,7 @@ function RouteComponent() {
   const [donationDialogOpen, setDonationDialogOpen ] = useState(false);
   const [pdfUrl , setPdfUrl] = useState('');
   const [dialogQuantityOpen, setDialogQuantityOpen] = useState(false);
-  const [cbDialogQuantity, setCbDialogQuantity] = useState<(number : number)=>any>(()=>null)
+  const [cbDialogQuantity, setCbDialogQuantity] = useState<(number : number) => void>(() => () => {})
   const {createQuotation, getDueDates , loading:quotationLoading} = useQuotationService();
   const [dueDates, setDueDates] = useState<DueDates[]|[]>([]);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -225,10 +237,14 @@ function RouteComponent() {
   }
 
   useEffect(() => {
-    getDueDates().then((data) => {
-      if(data) setDueDates(data);
-    });
-  }, []);
+    getDueDates()
+      .then((data) => {
+        if (data) setDueDates(data);
+      })
+      .catch(() => {
+        toast.error('No se pudo cargar el catálogo de fechas de vencimiento');
+      });
+  }, [getDueDates]);
 
   useEffect(() => {
     if (hasLoadedCurrencies) return;
@@ -243,6 +259,23 @@ function RouteComponent() {
         toast.error('No se pudo cargar el catálogo de monedas');
       });
   }, [hasLoadedCurrencies, listCurrencies, setCurrencies, setCurrenciesLoaded]);
+
+  useEffect(() => {
+    if (!currencies.length) return;
+
+    const currentCurrency = form.getValues('currency');
+    const isValidCurrency = currencies.some((currency) => currency.code === currentCurrency);
+    if (isValidCurrency) return;
+
+    const tenantCurrency = tenantSettings?.currency;
+    const fallbackCurrency = [tenantCurrency, DEFAULT_CURRENCY_CODE, currencies[0]?.code].find((code) =>
+      code ? currencies.some((currency) => currency.code === code) : false
+    );
+
+    if (fallbackCurrency) {
+      form.setValue('currency', fallbackCurrency, { shouldDirty: false });
+    }
+  }, [currencies, form, tenantSettings?.currency]);
 
   const applyCompanyToForm = (company: {name?: string, address?: string, city?: string, fiscal_number?: string, email?: string, phone?: string}) => {
     form.setValue('company.name', company?.name ?? '')
@@ -407,7 +440,7 @@ function RouteComponent() {
   /* Limpiar URL hacia el object. watch() */
   useEffect(()=>{
     if(!pdfOpen && pdfUrl) URL.revokeObjectURL(pdfUrl)
-  }, [pdfOpen])
+  }, [pdfOpen, pdfUrl])
 
 
   return (
@@ -518,7 +551,7 @@ function RouteComponent() {
                 control={form.control}
                 options={dueDates}
                 optionLabel='name'
-                optionValue='unique_id'
+                optionValue='id'
                 label='Fecha de vencimiento'
               />
               <FormSelect
