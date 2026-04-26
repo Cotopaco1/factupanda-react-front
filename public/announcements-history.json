@@ -1,0 +1,36 @@
+[
+  {
+    "id": "news-2026-04-19",
+    "title": "Mejoras en moneda para cotizaciones",
+    "publishedAt": "2026-04-19",
+    "summary": "Compartimos una mejora reciente en la creación y configuración de cotizaciones.",
+    "content": [
+      "Ahora puedes elegir la moneda al crear una cotización usando un catálogo centralizado de divisas.",
+      "También habilitamos la moneda predeterminada dentro de la configuración de tu empresa para reutilizarla en futuras cotizaciones.",
+      "Los montos ahora respetan mejor el formato decimal según la moneda seleccionada."
+    ]
+  },
+  {
+    "id": "news-2026-03-23",
+    "title": "Mejora de infraestructura de la plataforma",
+    "publishedAt": "2026-03-23",
+    "summary": "Compartimos una mejora reciente en la infraestructura de la plataforma.",
+    "content": [
+      "Hemos migrado parte de nuestros servicios con el objetivo de mejorar el rendimiento general de la plataforma y responder mejor al crecimiento del tráfico.",
+      "En algunos momentos, ese aumento de visitas podía hacer que ciertas páginas se sintieran lentas e incluso presentaran fallos intermitentes. Con esta actualización buscamos una experiencia más estable, rápida y confiable.",
+      "Son problemas que, en el fondo, también nos alegran: significan que cada vez más personas están usando FactuPanda."
+    ]
+  },
+  {
+    "id": "news-2026-03-09",
+    "title": "Correcciones y monitoreo de errores",
+    "publishedAt": "2026-03-09",
+    "summary": "Novedades enfocadas en estabilidad y observabilidad.",
+    "content": [
+      "Correción de error 500, al subir un logo y pasar mucho tiempo en la pagina.",
+      "Nuevo sistema de monitoreo de errores, ahora es mas facil detectarlos y arreglarlos",
+      "En desarrollo: Selector de separador de decimales.",
+      "Sus reportes han sido utiles, ¡gracias!"
+    ]
+  }
+]
