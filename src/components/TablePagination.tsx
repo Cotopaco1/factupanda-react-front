@@ -22,11 +22,18 @@ export function TablePagination({ paginator }: Props) {
   });
   // const router = useRouter();
 
+  const currentPage = search.page ?? 1;
+  const lastPage = paginator?.last_page ?? 1;
+
   return (
     <Pagination>
       <PaginationContent className="flex-wrap">
         <PaginationItem>
-          <PaginationPrevious disabled={(search.page ?? 1) <= 1} to='.' search={(prev) => ({ ...prev, page: (prev.page ?? 2) - 1 })} />
+          <PaginationPrevious 
+            disabled={currentPage <= 1} 
+            to='.' 
+            search={(prev) => ({ ...prev, page: Math.max(1, (prev.page ?? 1) - 1) })} 
+          />
         </PaginationItem>
         {/* Buttons */}
         {paginator && Array.from({ length: paginator.last_page }, (_, index) => (
@@ -40,7 +47,11 @@ export function TablePagination({ paginator }: Props) {
           <PaginationEllipsis />
         </PaginationItem> */}
         <PaginationItem>
-          <PaginationNext to='.' disabled={(search.page ?? 1) >= (paginator?.last_page ?? 0)} search={(prev) => ({ ...prev, page: (prev.page ?? 0) + 1 })} />
+          <PaginationNext 
+            to='.' 
+            disabled={currentPage >= lastPage} 
+            search={(prev) => ({ ...prev, page: Math.min(lastPage, (prev.page ?? 1) + 1) })} 
+          />
         </PaginationItem>
       </PaginationContent>
     </Pagination>

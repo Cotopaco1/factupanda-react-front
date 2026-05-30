@@ -1,5 +1,15 @@
 [
   {
+    "id": "news-2026-05-29",
+    "title": "Corrección en la paginación de cotizaciones",
+    "publishedAt": "2026-05-29",
+    "summary": "Corregimos un problema que impedía avanzar correctamente entre páginas de cotizaciones.",
+    "content": [
+      "Algunos usuarios no podían ver sus demás cotizaciones al usar el botón para ir a la siguiente página.",
+      "Ajustamos la navegación para que la lista avance correctamente desde la primera página y respete el límite de páginas disponibles."
+    ]
+  },
+  {
     "id": "news-2026-04-19",
     "title": "Mejoras en moneda para cotizaciones",
     "publishedAt": "2026-04-19",
