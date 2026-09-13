@@ -14,9 +14,17 @@ import { useState } from "react"
 import type { Currency } from "@/types/currency"
 import { formatDecimalAmount, formatMoney } from "@/lib/currency"
 
+/* Las columnas numericas van alineadas a la derecha: es lo que hace que las
+   cifras tabulares se lean como una columna de importes. */
 const columns = [
-  'Nombre', 'Descripción', 'Unidad de medida', 'Precio Unitario',
-  'Cantidad', 'Descuento(%)', 'Impuesto(%)', 'Total'
+  { label: 'Nombre' },
+  { label: 'Descripción' },
+  { label: 'Unidad de medida' },
+  { label: 'Precio Unitario', numeric: true },
+  { label: 'Cantidad', numeric: true },
+  { label: 'Descuento(%)', numeric: true },
+  { label: 'Impuesto(%)', numeric: true },
+  { label: 'Total', numeric: true },
 ];
 
 interface Props {
@@ -72,7 +80,11 @@ export function ProductsTable({products, onDelete, onUpdate, currency}:Props) {
           <TableHead className="w-[100px]">
            Acciones
           </TableHead>
-          {columns.map(col => <TableHead className="min-w-[200px]">{col}</TableHead>)}
+          {columns.map(col => (
+            <TableHead key={col.label} className={col.numeric ? "min-w-[200px] text-right" : "min-w-[200px]"}>
+              {col.label}
+            </TableHead>
+          ))}
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -89,12 +101,12 @@ export function ProductsTable({products, onDelete, onUpdate, currency}:Props) {
             <TableCell>{product.name}</TableCell>
             <TableCell>{product.description}</TableCell>
             <TableCell>{product.unit_of_measurement}</TableCell>
-            <TableCell>{formatDecimalAmount(Number(product.unit_price), { currency })}</TableCell>
-            <TableCell>{Number(product.quantity)}</TableCell>
-            <TableCell>{Number(product.discount_percentage ?? 0)}</TableCell>
-            <TableCell>{Number(product.tax_percentage ?? 0)}</TableCell>
+            <TableCell className="text-right">{formatDecimalAmount(Number(product.unit_price), { currency })}</TableCell>
+            <TableCell className="text-right">{Number(product.quantity)}</TableCell>
+            <TableCell className="text-right">{Number(product.discount_percentage ?? 0)}</TableCell>
+            <TableCell className="text-right">{Number(product.tax_percentage ?? 0)}</TableCell>
             {/* <TableCell>{ product.quantity && product.unit_price ? calculateProductTotal(product) : 0 }</TableCell> */}
-             <TableCell>{product.quantity && product.unit_price ? formatDecimalAmount(quotationDto.calculateProductTotal(product).total, { currency }) : formatDecimalAmount(0, { currency })}</TableCell>
+             <TableCell className="text-right">{product.quantity && product.unit_price ? formatDecimalAmount(quotationDto.calculateProductTotal(product).total, { currency }) : formatDecimalAmount(0, { currency })}</TableCell>
           </TableRow>
         ))}
       </TableBody>
@@ -106,23 +118,23 @@ export function ProductsTable({products, onDelete, onUpdate, currency}:Props) {
             <TableBody>
               <TableRow>
                 <TableCell className="font-bold">Base : </TableCell>
-                <TableCell>{formatMoney(quotationDto.baseAmount, { currency, currencyCode: currency?.code })}</TableCell>
+                <TableCell className="text-right">{formatMoney(quotationDto.baseAmount, { currency, currencyCode: currency?.code })}</TableCell>
               </TableRow>
               <TableRow>
                 <TableCell className="font-bold">Descuento : </TableCell>
-                <TableCell>{formatMoney(quotationDto.discountAmount, { currency, currencyCode: currency?.code })}</TableCell>
+                <TableCell className="text-right">{formatMoney(quotationDto.discountAmount, { currency, currencyCode: currency?.code })}</TableCell>
               </TableRow>
               <TableRow>
                 <TableCell className="font-bold">Subtotal : </TableCell>
-                <TableCell>{formatMoney(quotationDto.subTotal, { currency, currencyCode: currency?.code })}</TableCell>
+                <TableCell className="text-right">{formatMoney(quotationDto.subTotal, { currency, currencyCode: currency?.code })}</TableCell>
               </TableRow>
               <TableRow>
                 <TableCell className="font-bold">Impuesto : </TableCell>
-                <TableCell>{formatMoney(quotationDto.taxAmount, { currency, currencyCode: currency?.code })}</TableCell>
+                <TableCell className="text-right">{formatMoney(quotationDto.taxAmount, { currency, currencyCode: currency?.code })}</TableCell>
               </TableRow>
               <TableRow>
                 <TableCell className="font-bold">Total : </TableCell>
-                <TableCell>{formatMoney(quotationDto.total, { currency, currencyCode: currency?.code })}</TableCell>
+                <TableCell className="text-right">{formatMoney(quotationDto.total, { currency, currencyCode: currency?.code })}</TableCell>
               </TableRow>
             </TableBody>
           </Table>

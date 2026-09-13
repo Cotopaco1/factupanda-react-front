@@ -110,6 +110,13 @@ export function ProductsTable({ page, perPage }: ProductsTableProps) {
           </TableRow>
         </TableHeader>
         <TableBody>
+          {paginator?.data.length === 0 && (
+            <TableRow>
+              <TableCell colSpan={8} className="text-center text-muted-foreground py-8">
+                No hay productos registrados
+              </TableCell>
+            </TableRow>
+          )}
           {paginator?.data.map((product, index) => (
             <TableRow key={`${product.name}-${index}`}>
               <TableCell>

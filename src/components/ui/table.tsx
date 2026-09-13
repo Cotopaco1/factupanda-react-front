@@ -10,7 +10,9 @@ function Table({ className, ...props }: React.ComponentProps<"table">) {
     >
       <table
         data-slot="table"
-        className={cn("w-full caption-bottom text-sm", className)}
+        /* tabular-nums: las cifras de dinero deben alinearse en columna; con
+           anchos variables el 1 ocupa menos que el 8 y las columnas se tuercen. */
+        className={cn("w-full caption-bottom text-sm tabular-nums", className)}
         {...props}
       />
     </div>
