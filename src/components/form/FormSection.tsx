@@ -26,7 +26,9 @@ export function FormSection({title, children, className}: Props){
                 className,
             )}
         >
-            <FieldLegend className="mb-0 w-full border-b pb-3 text-base font-semibold">
+            {/* El <legend> queda fuera del flujo flex, asi que el gap del FieldSet
+                no lo separa del primer campo: el margen es la unica via. */}
+            <FieldLegend className="mb-6 w-full border-b pb-3 text-base font-semibold">
                 {title}
             </FieldLegend>
             {children}
