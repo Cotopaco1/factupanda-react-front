@@ -190,6 +190,16 @@ function RouteComponent() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const currencyOptions = useMemo(() => mapCurrenciesToSelectOptions(currencies), [currencies]);
   const selectedCurrencyCode = form.watch('currency');
+
+  /* Los productos del catalogo conservan su id al agregarse; los creados a mano
+     no tienen, y por eso no bloquean nada en el buscador. Se lee del formulario
+     y no de `fields`, porque useFieldArray sobrescribe `id` con su propia clave. */
+  const watchedProducts = form.watch('products');
+  const selectedProductIds = useMemo(() => new Set(
+    (watchedProducts ?? [])
+      .map((product) => (product as { id?: number }).id)
+      .filter((id): id is number => typeof id === 'number')
+  ), [watchedProducts]);
   const selectedCurrency = useMemo(
     () => findCurrencyByCode(currencies, selectedCurrencyCode),
     [currencies, selectedCurrencyCode]
@@ -651,7 +661,7 @@ function RouteComponent() {
               </div>
               {isLogin && (
                 <div>
-                  <ProductSearchInput cbSelected={cbProductSearch}/>
+                  <ProductSearchInput cbSelected={cbProductSearch} selectedProductIds={selectedProductIds}/>
                 </div>
               )}
             </div>

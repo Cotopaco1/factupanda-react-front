@@ -20,18 +20,24 @@ import { Spinner } from "../ui/spinner"
 
 
 type ProductSearchInputProps = {
-    cbSelected : (product : Product) => any
+    cbSelected : (product : Product) => void,
+    /**
+     * Ids de los productos que ya estan en la cotizacion. Se recibe desde el
+     * formulario en vez de llevar una lista propia: la lista local solo crecia,
+     * asi que un producto eliminado seguia bloqueado, y uno cuyo dialogo de
+     * cantidad se cancelaba quedaba bloqueado sin haberse agregado nunca.
+     */
+    selectedProductIds ?: ReadonlySet<number>,
 }
 
-export function ProductSearchInput({cbSelected}: ProductSearchInputProps){
+export function ProductSearchInput({cbSelected, selectedProductIds}: ProductSearchInputProps){
     const [open, setOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState("");
     const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
     const {loading, searchProducts} = useProductService();
-    const [historySelected, setHistorySelected] = useState<Product[]>([]);
 
     const wasSelected = (id:number): boolean => {
-        return !!historySelected.find(p => p.id === id);
+        return selectedProductIds?.has(id) ?? false;
     }
     /* Products */
     const [products, setProducts] = useState<Product[]|[]>([]);
@@ -40,7 +46,6 @@ export function ProductSearchInput({cbSelected}: ProductSearchInputProps){
         const product = products.find(p => p.id == Number(id));
         if(product){
             cbSelected(product)
-            setHistorySelected([...historySelected, product]);
         }
     }
 
