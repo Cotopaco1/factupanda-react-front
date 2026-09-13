@@ -448,6 +448,7 @@ function RouteComponent() {
     <DashboardLayout
       title='Generar Cotización'
       description='Genera una cotización en formato PDF, con los colores y el logo de tu Empresa.'
+     
       breadcrumb={breadcrumb}
     >
       <div>
@@ -526,7 +527,7 @@ function RouteComponent() {
               </div>
             </div>
           )}
-          <FormSection title='Detalles Cotización' description='Número, fecha de emisión, vencimiento y moneda.'>
+          <FormSection title='Detalles Cotización'>
             <FieldGroup className='grid md:grid-cols-2'>
               <FormInput
                 name="number"
@@ -571,7 +572,7 @@ function RouteComponent() {
             </FieldGroup>
           </FormSection>
 
-          <FormSection title='Personalización' description='Logo, plantilla y colores con los que se generará el PDF.'>
+          <FormSection title='Personalización'>
             <FieldGroup className='grid md:grid-cols-2'>
                 <FormUploadInput
                   control={form.control}
@@ -627,18 +628,18 @@ function RouteComponent() {
             </FieldGroup>
           </FormSection>
 
-          <FormSection title='Información de la empresa' description='Los datos tuyos que aparecerán como emisor.'>
+          <FormSection title='Información de la empresa'>
             <FieldGroup>
               <CompanyOrCustomerFormField control={form.control} suffix='company' />
             </FieldGroup>
           </FormSection>
 
-          <FormSection title='Información del cliente' description='A quién va dirigida la cotización.'>
+          <FormSection title='Información del cliente'>
             <FieldGroup>
               <CompanyOrCustomerFormField control={form.control} suffix='client' />
             </FieldGroup>
           </FormSection>
-          <FormSection title='Productos' description='Los items que se cotizan, con su precio, cantidad, descuento e impuesto.'>
+          <FormSection title='Productos'>
             {form.formState.errors.products && (
               <FieldError errors={[form.formState.errors.products]}/>
             )}
@@ -662,7 +663,7 @@ function RouteComponent() {
             </FieldGroup>
           </FormSection>
 
-          <FormSection title='Información extra' description='Notas y términos que se imprimen al final del documento.'>
+          <FormSection title='Información extra'>
             <FieldGroup>
               <FieldContent className='grid md:grid-cols-2 gap-4'>
                 <FormTextarea control={form.control} name='notes' label='Notas' placeholder='El envío corre por cuenta del cliente'/>

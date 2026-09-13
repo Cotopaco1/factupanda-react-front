@@ -4,7 +4,6 @@ import { cn } from "@/lib/utils";
 
 interface Props {
     title : string;
-    description ?: string;
     children : React.ReactNode;
     className ?: string;
 }
@@ -16,12 +15,8 @@ interface Props {
  * (16px contra 14px), asi que con seis secciones apiladas no se distinguia un
  * titulo de una etiqueta. El contraste se genera en las dos direcciones: el
  * titulo sube a semibold y las etiquetas bajan a peso normal y color atenuado.
- *
- * El titulo y su descripcion van dentro del <legend> a proposito: el elemento
- * debe ser el primer hijo del <fieldset>, asi que no se pueden envolver juntos
- * en un div sin romper la semantica.
  */
-export function FormSection({title, description, children, className}: Props){
+export function FormSection({title, children, className}: Props){
     return (
         <FieldSet
             className={cn(
@@ -31,11 +26,8 @@ export function FormSection({title, description, children, className}: Props){
                 className,
             )}
         >
-            <FieldLegend className="mb-0 flex w-full flex-col gap-1 border-b pb-3">
-                <span className="text-base font-semibold">{title}</span>
-                {description && (
-                    <span className="text-muted-foreground text-[13px] font-normal">{description}</span>
-                )}
+            <FieldLegend className="mb-0 w-full border-b pb-3 text-base font-semibold">
+                {title}
             </FieldLegend>
             {children}
         </FieldSet>
