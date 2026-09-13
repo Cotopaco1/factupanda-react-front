@@ -9,7 +9,8 @@ import { useTenantSettingsStore } from '@/stores/tenantSettingsStore';
 import { useCurrencyStore } from '@/stores/currencyStore';
 import { InfoTooltip } from '@/components/ui/InfoTooltip';
 import type { DueDates } from '@/types/quotation'
-import { FieldSet, FieldLegend, FieldGroup, FieldContent, FieldLabel, FieldError } from "@/components/ui/field"
+import { FieldGroup, FieldContent, FieldLabel, FieldError } from "@/components/ui/field"
+import { FormSection } from '@/components/form/FormSection'
 import { FormInput } from '@/components/form/FormInput'
 import { FormSelect } from '@/components/form/FormSelect'
 import { CompanyOrCustomerFormField } from '@/components/quotation/CompanyOrCustomerFormFields'
@@ -525,8 +526,7 @@ function RouteComponent() {
               </div>
             </div>
           )}
-          <FieldSet>
-            <FieldLegend>Detalles Cotización</FieldLegend>
+          <FormSection title='Detalles Cotización' description='Número, fecha de emisión, vencimiento y moneda.'>
             <FieldGroup className='grid md:grid-cols-2'>
               <FormInput
                 name="number"
@@ -569,10 +569,9 @@ function RouteComponent() {
                 }
               />
             </FieldGroup>
-          </FieldSet>
+          </FormSection>
 
-          <FieldSet>
-            <FieldLegend>Personalización</FieldLegend>
+          <FormSection title='Personalización' description='Logo, plantilla y colores con los que se generará el PDF.'>
             <FieldGroup className='grid md:grid-cols-2'>
                 <FormUploadInput
                   control={form.control}
@@ -626,23 +625,20 @@ function RouteComponent() {
                   </div>
                 </div>
             </FieldGroup>
-          </FieldSet>
+          </FormSection>
 
-          <FieldSet>
-            <FieldLegend>Información de la empresa</FieldLegend>
+          <FormSection title='Información de la empresa' description='Los datos tuyos que aparecerán como emisor.'>
             <FieldGroup>
               <CompanyOrCustomerFormField control={form.control} suffix='company' />
             </FieldGroup>
-          </FieldSet>
+          </FormSection>
 
-          <FieldSet>
-            <FieldLegend>Información del Cliente</FieldLegend>
+          <FormSection title='Información del cliente' description='A quién va dirigida la cotización.'>
             <FieldGroup>
               <CompanyOrCustomerFormField control={form.control} suffix='client' />
             </FieldGroup>
-          </FieldSet>
-          <FieldSet>
-            <FieldLegend>Productos</FieldLegend>
+          </FormSection>
+          <FormSection title='Productos' description='Los items que se cotizan, con su precio, cantidad, descuento e impuesto.'>
             {form.formState.errors.products && (
               <FieldError errors={[form.formState.errors.products]}/>
             )}
@@ -664,17 +660,16 @@ function RouteComponent() {
               
               </FieldContent>
             </FieldGroup>
-          </FieldSet>
+          </FormSection>
 
-          <FieldSet>
-            <FieldLegend>Información extra</FieldLegend>
+          <FormSection title='Información extra' description='Notas y términos que se imprimen al final del documento.'>
             <FieldGroup>
               <FieldContent className='grid md:grid-cols-2 gap-4'>
                 <FormTextarea control={form.control} name='notes' label='Notas' placeholder='El envío corre por cuenta del cliente'/>
                 <FormTextarea control={form.control} name='terms' label='Terminos y condiciones' placeholder='Enviar el pago a la cuenta #221332123'/>
               </FieldContent>
             </FieldGroup>
-          </FieldSet>
+          </FormSection>
 
           <div className='flex flex-col items-end gap-2'>
             {form.formState.errors.root && (

@@ -6,7 +6,8 @@ import { useEffect, useState } from 'react'
 import { useQuotationService } from '@/services/quotationService'
 import { useCurrencyService } from '@/services/currencyService'
 import { useCurrencyStore } from '@/stores/currencyStore'
-import { FieldSet, FieldLegend, FieldGroup, FieldContent, FieldError } from "@/components/ui/field"
+import { FieldGroup, FieldContent, FieldError } from "@/components/ui/field"
+import { FormSection } from '@/components/form/FormSection'
 import { FormInput } from '@/components/form/FormInput'
 import { FormSelect } from '@/components/form/FormSelect'
 import { CompanyOrCustomerFormField } from '@/components/quotation/CompanyOrCustomerFormFields'
@@ -203,8 +204,7 @@ function RouteComponent() {
       <Card className='w-full'>
         <CardContent>
           <form onSubmit={form.handleSubmit(onSubmit)} className='flex flex-col gap-6'>
-            <FieldSet>
-              <FieldLegend>Detalles Cotización</FieldLegend>
+            <FormSection title='Detalles Cotización' description='Número, fecha de emisión, vencimiento y moneda.'>
               <FieldGroup className='grid md:grid-cols-2 lg:grid-cols-3'>
                 <FormInput
                   name="number"
@@ -249,24 +249,21 @@ function RouteComponent() {
                   />
                 )}
               </FieldGroup>
-            </FieldSet>
+            </FormSection>
 
-            <FieldSet>
-              <FieldLegend>Información de la Empresa</FieldLegend>
+            <FormSection title='Información de la empresa' description='Los datos tuyos que aparecerán como emisor.'>
               <FieldGroup>
                 <CompanyOrCustomerFormField control={form.control} suffix='company' />
               </FieldGroup>
-            </FieldSet>
+            </FormSection>
 
-            <FieldSet>
-              <FieldLegend>Información del Cliente</FieldLegend>
+            <FormSection title='Información del cliente' description='A quién va dirigida la cotización.'>
               <FieldGroup>
                 <CompanyOrCustomerFormField control={form.control} suffix='client' />
               </FieldGroup>
-            </FieldSet>
+            </FormSection>
 
-            <FieldSet>
-              <FieldLegend>Productos</FieldLegend>
+            <FormSection title='Productos' description='Los items que se cotizan, con su precio, cantidad, descuento e impuesto.'>
               {form.formState.errors.products && (
                 <FieldError errors={[form.formState.errors.products]} />
               )}
@@ -282,17 +279,16 @@ function RouteComponent() {
                   <ProductsTable products={fields} onDelete={handleDeleteProduct} onUpdate={handleUpdateProduct} currency={selectedCurrency} />
                 </FieldContent>
               </FieldGroup>
-            </FieldSet>
+            </FormSection>
 
-            <FieldSet>
-              <FieldLegend>Información Extra</FieldLegend>
+            <FormSection title='Información extra' description='Notas y términos que se imprimen al final del documento.'>
               <FieldGroup>
                 <FieldContent className='grid md:grid-cols-2 gap-4'>
                   <FormTextarea control={form.control} name='notes' label='Notas' placeholder='Notas adicionales para el cliente' />
                   <FormTextarea control={form.control} name='terms' label='Términos y Condiciones' placeholder='Términos de pago y condiciones' />
                 </FieldContent>
               </FieldGroup>
-            </FieldSet>
+            </FormSection>
 
             <div className='flex gap-4'>
               <ButtonLoader className='py-6' loading={loading} type='submit'>
