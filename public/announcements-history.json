@@ -1,5 +1,18 @@
 [
   {
+    "id": "news-2026-09-13",
+    "title": "Cotizaciones que antes fallaban en silencio",
+    "publishedAt": "2026-09-13",
+    "summary": "Corregimos los errores que impedían generar algunas cotizaciones y mejoramos el formulario.",
+    "content": [
+      "Si faltaba algún dato, el botón de generar no hacía nada y no se explicaba el motivo. Ahora te indicamos en pantalla qué campo corregir.",
+      "Ya puedes generar cotizaciones por montos altos y usar logos de mayor resolución sin que se interrumpa la descarga.",
+      "El precio unitario acepta el formato que uses habitualmente, por ejemplo 1.500,00 o 1,500.50.",
+      "Al quitar un producto de la cotización vuelve a quedar disponible para agregarlo de nuevo.",
+      "Renovamos la cabecera y las secciones del formulario, y alineamos los importes de las tablas para que se lean mejor."
+    ]
+  },
+  {
     "id": "news-2026-05-29",
     "title": "Corrección en la paginación de cotizaciones",
     "publishedAt": "2026-05-29",

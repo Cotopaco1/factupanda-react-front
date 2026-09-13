@@ -119,7 +119,9 @@ export function UpdatesDialog() {
               <p className='text-xs font-medium uppercase tracking-wide text-muted-foreground'>
                 Historial
               </p>
-              <div className='space-y-2'>
+              {/* El dialogo no acota su altura, asi que sin estos topes crece
+                  con cada anuncio hasta salirse de la pantalla. */}
+              <div className='max-h-[30vh] space-y-2 overflow-y-auto pr-1 md:max-h-[55vh]'>
                 {sortedAnnouncements.map((announcement, index) => {
                   const isSelected = selectedAnnouncement.id === announcement.id
                   const isLatest = index === 0
@@ -151,7 +153,7 @@ export function UpdatesDialog() {
                 })}
               </div>
             </div>
-            <div className='self-start rounded-md border p-4'>
+            <div className='max-h-[45vh] self-start overflow-y-auto rounded-md border p-4 md:max-h-[55vh]'>
               <h3 className='text-lg font-semibold leading-6'>{selectedAnnouncement.title}</h3>
               <div className='mt-3 space-y-2 text-sm leading-5 text-foreground'>
                 {selectedAnnouncement.content.map((paragraph, index) => (
