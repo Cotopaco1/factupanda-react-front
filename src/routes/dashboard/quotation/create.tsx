@@ -677,7 +677,10 @@ function RouteComponent() {
             </FieldGroup>
           </FieldSet>
 
-          <div className='flex justify-end'>
+          <div className='flex flex-col items-end gap-2'>
+            {form.formState.errors.root && (
+              <FieldError errors={[form.formState.errors.root]}/>
+            )}
             <ButtonLoader className='py-4' loading={quotationLoading} type='submit'>Generar cotización</ButtonLoader>
           </div>
         </form>
