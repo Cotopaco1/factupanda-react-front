@@ -3,7 +3,7 @@ import { ProductsTable } from '@/components/products/ProductsTable'
 import { Button } from '@/components/ui/button';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { PackageIcon, PlusIcon } from 'lucide-react';
+import { PlusIcon } from 'lucide-react';
 
 type ProductsIndexSearch = {
   per_page : number;
@@ -35,18 +35,14 @@ function RouteComponent() {
     <DashboardLayout
       title='Productos'
       description='Los productos te ayudan a armar cotizaciones rapido y consistente.'
-      descriptionIcon={<PackageIcon />}
       breadcrumb={breadcrumb}
+      actions={
+        <Link to='/dashboard/products/create'>
+          <Button> <PlusIcon/> Agregar Producto</Button>
+        </Link>
+      }
     >
-        <div className='grid gap-4'>
-          <div>
-            <Link to='/dashboard/products/create'>
-              <Button> <PlusIcon/> Agregar Producto</Button>
-            </Link>
-          </div>
-          {/* Tabla de productos... */}
-          <ProductsTable page={page} perPage={per_page} />
-        </div>
+      <ProductsTable page={page} perPage={per_page} />
     </DashboardLayout>
   )
 }

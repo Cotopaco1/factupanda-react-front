@@ -1,5 +1,5 @@
 import { createFileRoute, Outlet } from '@tanstack/react-router'
-import { SidebarProvider, SidebarTrigger } from '../../components/ui/sidebar'
+import { SidebarInset, SidebarProvider } from '../../components/ui/sidebar'
 import { AppSidebar } from '../../components/app-sidebar'
 import { useUserStore } from '@/stores/userStore'
 import { useEffect } from 'react'
@@ -59,10 +59,9 @@ function RouteComponent() {
       {loading && (
         <DialogLoading/>
       )}
-      <main className='p-4 w-full'>
-        <SidebarTrigger />
+      <SidebarInset>
         <Outlet/>
-      </main>
+      </SidebarInset>
     </SidebarProvider>
 )
 }

@@ -3,7 +3,7 @@ import { QuotationsTable } from '@/components/quotation/QuotationsTable'
 import { Button } from '@/components/ui/button';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { FileTextIcon, PlusIcon } from 'lucide-react';
+import { PlusIcon } from 'lucide-react';
 
 type QuotationsIndexSearch = {
   per_page: number;
@@ -35,17 +35,14 @@ function RouteComponent() {
     <DashboardLayout
       title='Cotizaciones'
       description='Lista de cotizaciones guardadas'
-      descriptionIcon={<FileTextIcon />}
       breadcrumb={breadcrumb}
+      actions={
+        <Link to='/dashboard/quotation/create'>
+          <Button> <PlusIcon /> Nueva Cotización</Button>
+        </Link>
+      }
     >
-      <div>
-        <div>
-          <Link to='/dashboard/quotation/create'>
-            <Button> <PlusIcon /> Nueva Cotización</Button>
-          </Link>
-        </div>
-        <QuotationsTable page={page} perPage={per_page} />
-      </div>
+      <QuotationsTable page={page} perPage={per_page} />
     </DashboardLayout>
   )
 }

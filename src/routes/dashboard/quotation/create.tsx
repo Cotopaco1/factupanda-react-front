@@ -17,7 +17,7 @@ import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { quotationSchema } from '@/schemas/quotation'
 import { ProductsTable } from '@/components/quotation/ProductsTable'
-import { FileTextIcon, PlusIcon } from 'lucide-react'
+import { PlusIcon } from 'lucide-react'
 import { DialogProductForm } from '@/components/products/DialogProductForm'
 import { FormUploadInput } from '@/components/form/FormUploadInput'
 import { FormColorInput } from '@/components/form/FormColorInput'
@@ -447,7 +447,6 @@ function RouteComponent() {
     <DashboardLayout
       title='Generar Cotización'
       description='Genera una cotización en formato PDF, con los colores y el logo de tu Empresa.'
-      descriptionIcon={<FileTextIcon />}
       breadcrumb={breadcrumb}
     >
       <div>
