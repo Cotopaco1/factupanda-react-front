@@ -23,6 +23,10 @@ import { DialogProductForm } from '@/components/products/DialogProductForm'
 import { FormUploadInput } from '@/components/form/FormUploadInput'
 import { FormColorInput } from '@/components/form/FormColorInput'
 import { DialogPdfQuotation } from '@/components/quotation/DialogPdfQuotation'
+import { DialogGeneratingQuotation } from '@/components/quotation/DialogGeneratingQuotation'
+import { CelebrationToast } from '@/components/brand/CelebrationToast'
+import { DevCelebrationPanel } from '@/components/dev/DevCelebrationPanel'
+import { celebrationFor, markCelebrationSeen, type Celebration } from '@/services/milestones'
 import { FormTextarea } from '@/components/form/FormTextarea'
 import { ProductSearchInput } from '@/components/products/ProductsSearchInput'
 import { useUserStore } from '@/stores/userStore'
@@ -184,6 +188,8 @@ function RouteComponent() {
   const [pdfOpen, setPdfOpen] = useState(false);
   const [donationDialogOpen, setDonationDialogOpen ] = useState(false);
   const [pdfUrl , setPdfUrl] = useState('');
+  const [pendingCelebration, setPendingCelebration] = useState<Celebration | null>(null);
+  const [shownCelebration, setShownCelebration] = useState<Celebration | null>(null);
   const [dialogQuantityOpen, setDialogQuantityOpen] = useState(false);
   const [cbDialogQuantity, setCbDialogQuantity] = useState<(number : number) => void>(() => () => {})
   const {createQuotation, getDueDates , loading:quotationLoading} = useQuotationService();
@@ -214,9 +220,14 @@ function RouteComponent() {
   const onSubmit = (data : FormValues) => {
     console.log(data);
     createQuotation(data)
-    .then((file) => {
+    .then(({ file, count }) => {
       setPdfUrl(URL.createObjectURL(file))
       setPdfOpen(true);
+
+      /* Sin cuenta el API no guarda nada, asi que el conteo lo lleva el
+         navegador. Se decide ya, pero se muestra al cerrar el PDF. */
+      const localCount = incrementQuoteCount();
+      setPendingCelebration(celebrationFor(count ?? localCount, count !== null));
       try{
         localStorage.setItem('quotation.company', JSON.stringify(data.company))
         localStorage.setItem('quotation.customization', JSON.stringify({primaryColor : data.primaryColor, secundaryColor : data.secundaryColor, template: data.template, currency: data.currency}))
@@ -225,8 +236,6 @@ function RouteComponent() {
         console.log("An error ocurred during saving default values",error )
       }
 
-      incrementQuoteCount();
-      
     })
     .catch(async (error) => {
       await MergeServerErrorsToForm(error, form);
@@ -466,7 +475,29 @@ function RouteComponent() {
         <LogoInvalidatedAlertBanner/>
         <DonationDomainAlertBanner open={donationDialogOpen} setOpen={setDonationDialogOpen}/>
         <DialogQuantity open={dialogQuantityOpen} setOpen={setDialogQuantityOpen} cb={cbDialogQuantity} />
-        <DialogPdfQuotation open={pdfOpen} setOpen={setPdfOpen} url={pdfUrl}/>
+        <DialogGeneratingQuotation open={quotationLoading}/>
+        <CelebrationToast
+          celebration={shownCelebration}
+          onClose={() => {
+            if (shownCelebration) markCelebrationSeen(shownCelebration.id);
+            setShownCelebration(null);
+          }}
+        />
+        <DevCelebrationPanel onShow={setShownCelebration}/>
+        <DialogPdfQuotation
+          open={pdfOpen}
+          setOpen={(open) => {
+            setPdfOpen(open);
+
+            /* Celebrar solo cuando el usuario ya tiene su PDF: la cotizacion
+               es el trabajo y el aplauso no debe estorbarlo. */
+            if (typeof open === 'boolean' && !open && pendingCelebration) {
+              setShownCelebration(pendingCelebration);
+              setPendingCelebration(null);
+            }
+          }}
+          url={pdfUrl}
+        />
         <Dialog
           open={confirmDialogOpen}
           onOpenChange={(open) => {

@@ -42,11 +42,19 @@ export const useQuotationService = () => {
         }
     }
 
-    const createQuotation = async (data: unknown) : Promise<Blob> => {
+    /**
+     * Devuelve tambien el total acumulado, que el API manda en la cabecera
+     * X-Quotation-Count porque el cuerpo es un PDF y no puede llevar JSON.
+     * Es null para quien no tiene cuenta: ahi no se guarda nada.
+     */
+    const createQuotation = async (data: unknown) : Promise<{ file: Blob; count: number | null }> => {
         setLoading(true);
         try {
             const response = await apiClient.post('/quotations', data, { responseType : 'blob'});
-            return response.data;
+            const rawCount = response.headers['x-quotation-count'];
+            const count = Number(rawCount);
+
+            return { file: response.data, count: Number.isFinite(count) && rawCount ? count : null };
         } catch (error: unknown) {
             await parseBlobErrorResponse(error);
             throw error;
