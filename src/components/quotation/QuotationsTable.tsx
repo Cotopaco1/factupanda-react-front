@@ -1,3 +1,4 @@
+import { PandaLottie } from "@/components/brand/PandaLottie"
 import {
   Table,
   TableBody,
@@ -145,8 +146,12 @@ export function QuotationsTable({ page, perPage }: QuotationsTableProps) {
         <TableBody>
           {paginator?.data.length === 0 && (
             <TableRow>
-              <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
-                No hay cotizaciones registradas
+              <TableCell colSpan={7} className="py-10">
+                <div className="flex flex-col items-center gap-2 text-center">
+                  <PandaLottie name="vacio" size={180} label=""/>
+                  <p className="font-semibold">Aún no tienes cotizaciones</p>
+                  <p className="text-muted-foreground text-sm">La primera es la que más cuesta. ¡Vamos! 🐼</p>
+                </div>
               </TableCell>
             </TableRow>
           )}

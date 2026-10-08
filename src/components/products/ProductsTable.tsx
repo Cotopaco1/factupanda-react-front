@@ -1,3 +1,4 @@
+import { PandaLottie } from "@/components/brand/PandaLottie"
 import {
   Table,
   TableBody,
@@ -112,8 +113,12 @@ export function ProductsTable({ page, perPage }: ProductsTableProps) {
         <TableBody>
           {paginator?.data.length === 0 && (
             <TableRow>
-              <TableCell colSpan={8} className="text-center text-muted-foreground py-8">
-                No hay productos registrados
+              <TableCell colSpan={8} className="py-10">
+                <div className="flex flex-col items-center gap-2 text-center">
+                  <PandaLottie name="vacio" size={180} label=""/>
+                  <p className="font-semibold">Aún no tienes productos</p>
+                  <p className="text-muted-foreground text-sm">Guárdalos una vez y los reutilizas en cada cotización. 🐼</p>
+                </div>
               </TableCell>
             </TableRow>
           )}
