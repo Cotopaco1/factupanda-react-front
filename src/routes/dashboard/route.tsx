@@ -19,6 +19,7 @@ function RouteComponent() {
   const setUser = useUserStore((state)=> state.setUser);
   const setToken = useUserStore((state)=> state.setToken);
   const setIsLogin = useUserStore((state)=> state.setIsLogin);
+  const setSessionChecked = useUserStore((state)=> state.setSessionChecked);
   const {getUser, loading} = useUserService();
   const { get: getTenantSettings } = useTenantSettingsService();
   const setTenantSettings = useTenantSettingsStore((state) => state.setSettings);
@@ -27,7 +28,14 @@ function RouteComponent() {
   
   useEffect(() => {
     const token = localStorage.getItem('tkn');
-    if(user === undefined && token){
+
+    /* Sin token no hay nada que resolver: la sesion ya esta comprobada. */
+    if(!token){
+      setSessionChecked(true);
+      return;
+    }
+
+    if(user === undefined){
       getUser()
       .then((data)=> {
         setIsLogin(true);
@@ -35,6 +43,10 @@ function RouteComponent() {
         setToken(token);
       })
       .catch(()=>console.log("User is not authenticated"))
+      /* Tambien al fallar: un token caducado deja la sesion resuelta. */
+      .finally(()=> setSessionChecked(true))
+    } else {
+      setSessionChecked(true);
     }
   }, []);
 

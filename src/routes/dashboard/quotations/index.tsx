@@ -1,3 +1,4 @@
+import { RequiresSession } from '@/components/brand/RequiresSession'
 import { DashboardLayout, type BreadcrumbItemType } from '@/components/layouts/DashboardLayout';
 import { QuotationsTable } from '@/components/quotation/QuotationsTable'
 import { Button } from '@/components/ui/button';
@@ -42,7 +43,9 @@ function RouteComponent() {
         </Link>
       }
     >
-      <QuotationsTable page={page} perPage={per_page} />
+      <RequiresSession what='todo lo que cotices'>
+        <QuotationsTable page={page} perPage={per_page} />
+      </RequiresSession>
     </DashboardLayout>
   )
 }

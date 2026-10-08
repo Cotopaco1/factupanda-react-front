@@ -1,3 +1,4 @@
+import { RequiresSession } from '@/components/brand/RequiresSession'
 import { DashboardLayout, type BreadcrumbItemType } from '@/components/layouts/DashboardLayout';
 import { ProductsTable } from '@/components/products/ProductsTable'
 import { Button } from '@/components/ui/button';
@@ -42,7 +43,9 @@ function RouteComponent() {
         </Link>
       }
     >
-      <ProductsTable page={page} perPage={per_page} />
+      <RequiresSession what='tu catálogo'>
+        <ProductsTable page={page} perPage={per_page} />
+      </RequiresSession>
     </DashboardLayout>
   )
 }

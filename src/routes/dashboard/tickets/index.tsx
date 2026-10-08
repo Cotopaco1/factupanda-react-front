@@ -1,3 +1,4 @@
+import { RequiresSession } from '@/components/brand/RequiresSession'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useEffect } from 'react'
 
@@ -44,6 +45,8 @@ function RouteComponent() {
   const { page, per_page, status } = Route.useSearch()
   const navigate = useNavigate()
   const user = useUserStore((state) => state.user)
+  const isLogin = useUserStore((state) => state.isLogin)
+  const sessionChecked = useUserStore((state) => state.sessionChecked)
 
   const form = useForm<{ status: string }>({
     defaultValues: {
@@ -68,6 +71,16 @@ function RouteComponent() {
       }),
     })
   }, [navigate, selectedStatus, status])
+
+  /* Antes del chequeo de admin: a un anonimo le sirve mas una invitacion a
+     iniciar sesion que un "no autorizado". */
+  if (!isLogin && sessionChecked) {
+    return (
+      <DashboardLayout title='Tickets' description='Listado de tickets' breadcrumb={breadcrumb}>
+        <RequiresSession what='el seguimiento de tickets'>{null}</RequiresSession>
+      </DashboardLayout>
+    )
+  }
 
   if (!user?.is_admin) {
     return (

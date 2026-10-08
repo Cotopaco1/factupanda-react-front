@@ -1,3 +1,5 @@
+import { RequiresSession } from '@/components/brand/RequiresSession'
+import { useUserStore } from '@/stores/userStore'
 import { ButtonLoader } from '@/components/ButtonLoader'
 import { DashboardLayout, type BreadcrumbItemType } from '@/components/layouts/DashboardLayout'
 import { FormColorInput } from '@/components/form/FormColorInput'
@@ -48,6 +50,8 @@ const localeOptions = [
 ]
 
 function RouteComponent() {
+  const isLogin = useUserStore((state) => state.isLogin);
+  const sessionChecked = useUserStore((state) => state.sessionChecked);
   useDocumentTitle('Configuración');
   const { get, update, loading } = useTenantSettingsService();
   const { list: listCurrencies } = useCurrencyService();
@@ -138,6 +142,18 @@ function RouteComponent() {
     }).catch(async (error) => {
       await MergeServerErrorsToForm(error, form);
     });
+  }
+
+  if (!isLogin && sessionChecked) {
+    return (
+      <DashboardLayout
+        title='Configuración'
+        description='Cambiando los datos prederminados de la aplicacion y de tu empresa'
+        breadcrumb={breadcrumb}
+      >
+        <RequiresSession what='la configuración de tu empresa'>{null}</RequiresSession>
+      </DashboardLayout>
+    );
   }
 
   if (initialLoading) {
