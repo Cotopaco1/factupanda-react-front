@@ -1,4 +1,5 @@
 import { Button } from '@/components/ui/button'
+import { QuotationsGeneratedCounter } from '@/components/landing/QuotationsGeneratedCounter'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { FileIcon, GiftIcon, PackageIcon, PercentIcon, UserIcon, type LucideIcon } from 'lucide-react'
 import ExampleQuotation from "@/assets/example-quotation-factupanda.jpg";
@@ -66,6 +67,7 @@ function Index() {
           <Button className='w-max p-6'>
             <Link to='/dashboard/quotation/create'>Crear Cotización</Link>
           </Button>
+          <QuotationsGeneratedCounter/>
         </div>
         {/* Second */}
         <div>
