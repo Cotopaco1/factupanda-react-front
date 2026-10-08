@@ -3,6 +3,21 @@
 
 @custom-variant dark (&:is(.dark *));
 
+@font-face {
+  font-family: "Fredoka";
+  src: url("/fonts/Fredoka-700.woff2") format("woff2");
+  font-weight: 700;
+  font-display: swap;
+}
+
+/* Tokens del estilo sticker de la landing: borde grueso y sombra solida, sin
+   difuminar. Definidos en ambos temas para no romper el switch de tema. */
+@theme inline {
+  --color-sticker-ink: var(--sticker-ink);
+  --color-sticker-pop: var(--sticker-pop);
+  --font-display: "Fredoka", ui-rounded, system-ui, sans-serif;
+}
+
 :root {
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
@@ -44,12 +59,17 @@
   --warning : oklch(98.7% 0.026 102.212);
   --warning-foreground: oklch(79.5% 0.184 86.047);
   --highlight : oklch(55.8% 0.288 302.321);
+  --sticker-ink: oklch(0.14 0 0);
+  --sticker-pop: oklch(89.4% 0.178 95.3);
   --highlight-foreground : oklch(97.7% 0.014 308.299);
 
 
 }
 
 .dark {
+  /* Tinta del estilo sticker: se invierte para que el borde siga viendose. */
+  --sticker-ink: oklch(0.985 0 0);
+  --sticker-pop: oklch(89.4% 0.178 95.3);
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
   --card: oklch(0.145 0 0);

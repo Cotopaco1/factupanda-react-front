@@ -1,14 +1,9 @@
 import { apiClient } from '@/lib/apiClient'
 import { useCountUp } from '@/hooks/useCountUp'
 import { useEffect, useState } from 'react'
-import pandaAvatar from '@/assets/avatar-panda.png'
+import { PandaLottie } from '@/components/brand/PandaLottie'
+import { SpeechBubble } from '@/components/brand/SpeechBubble'
 
-/**
- * Prueba social con el contador acumulado de la plataforma.
- *
- * Si la peticion falla no se renderiza nada: es mejor no mostrar el bloque que
- * mostrar un cero, que diria justo lo contrario de lo que queremos transmitir.
- */
 /**
  * Solo en desarrollo: ?total=99999 fuerza la cifra para poder ver la animacion
  * con cualquier numero sin tocar la base de datos.
@@ -22,9 +17,31 @@ const forcedTotal = (): number | null => {
     return raw !== null && Number.isFinite(parsed) ? parsed : null
 }
 
+/**
+ * Franja de prueba social con el acumulado de la plataforma.
+ *
+ * Ocupa su propia banda a todo el ancho y no una tarjeta dentro del hero: la
+ * cifra es un argumento de venta, no una nota al pie.
+ *
+ * Si la peticion falla no se renderiza nada, porque mostrar un cero diria
+ * justo lo contrario de lo que queremos transmitir.
+ */
+/**
+ * Redondea a la centena inferior y antepone "+", porque la cifra exacta no
+ * aporta nada y envejece peor: "+24.400" sigue siendo cierto manana.
+ *
+ * Por debajo de 100 se muestra el numero exacto sin "+", ya que redondear
+ * daria "+0" y diria lo contrario de lo que queremos transmitir.
+ */
+const roundDownToHundred = (total: number): { value: number; prefix: string } =>
+    total >= 100
+        ? { value: Math.floor(total / 100) * 100, prefix: '+' }
+        : { value: total, prefix: '' }
+
 export function QuotationsGeneratedCounter() {
     const [total, setTotal] = useState<number | null>(forcedTotal)
-    const animated = useCountUp(total)
+    const display = total === null ? null : roundDownToHundred(total)
+    const animated = useCountUp(display?.value ?? null)
 
     useEffect(() => {
         if (forcedTotal() !== null) return
@@ -45,22 +62,23 @@ export function QuotationsGeneratedCounter() {
         }
     }, [])
 
-    if (total === null || total <= 0) return null
+    if (display === null || display.value <= 0) return null
 
     return (
-        <div className='bg-secondary flex items-center gap-4 rounded-lg p-4 md:p-6'>
-            <img
-                src={pandaAvatar}
-                alt=''
-                aria-hidden='true'
-                className='size-14 shrink-0 md:size-16'
-            />
-            <p className='text-sm md:text-base'>
-                <span className='text-highlight block text-3xl font-bold tabular-nums md:text-4xl'>
+        <section className='flex flex-col items-center gap-3 sm:flex-row sm:items-center sm:justify-center sm:gap-6'>
+            <PandaLottie name='reposo' size={140} label='' />
+
+            {/* El panda dice la cifra, en vez de que la cifra lleve una
+                explicacion al lado. */}
+            <SpeechBubble className='px-7 py-5 text-center' tailClassName='top-12 hidden sm:block'>
+                <p className='text-highlight font-display text-5xl leading-none tabular-nums sm:text-6xl'>
+                    {display.prefix}
                     {animated.toLocaleString('es')}
-                </span>
-                cotizaciones ya generadas en Factupanda. ¡Este panda no para! 🐼
-            </p>
-        </div>
+                </p>
+                <p className='mt-1 text-base font-medium'>
+                    cotizaciones creadas. ¡Y seguimos! 🐼
+                </p>
+            </SpeechBubble>
+        </section>
     )
 }
