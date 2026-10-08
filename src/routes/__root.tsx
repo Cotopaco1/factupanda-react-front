@@ -12,7 +12,7 @@ const maintenanceMessage =
   'Nos demoramos aproximadamente 1 hora. Gracias por tu paciencia.'
 
 const RootLayout = () => (
-  <ThemeProvider defaultTheme='light'>
+  <ThemeProvider defaultTheme='light' locked>
     {maintenanceEnabled ? (
       <MaintenanceScreen message={maintenanceMessage} />
     ) : (

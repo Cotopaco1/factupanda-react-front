@@ -6,6 +6,12 @@ type ThemeProviderProps = {
   children: React.ReactNode
   defaultTheme?: Theme
   storageKey?: string
+  /**
+   * Fija el tema e ignora lo guardado. La marca es light-first (las
+   * animaciones del panda estan dibujadas sobre blanco), asi que por ahora no
+   * ofrecemos el cambio. El CSS de .dark se queda dormido para poder volver.
+   */
+  locked?: boolean
 }
 
 type ThemeProviderState = {
@@ -24,11 +30,18 @@ export function ThemeProvider({
   children,
   defaultTheme = "system",
   storageKey = "vite-ui-theme",
+  locked = false,
   ...props
 }: ThemeProviderProps) {
-  const [theme, setTheme] = useState<Theme>(
-    () => (localStorage.getItem(storageKey) as Theme) || defaultTheme
+  const [theme, setTheme] = useState<Theme>(() =>
+    locked ? defaultTheme : (localStorage.getItem(storageKey) as Theme) || defaultTheme
   )
+
+  /* Sin esto, quien ya habia elegido oscuro quedaria atrapado ahi al quitar el
+     boton, porque el valor guardado gana sobre defaultTheme. */
+  useEffect(() => {
+    if (locked) localStorage.removeItem(storageKey)
+  }, [locked, storageKey])
 
   useEffect(() => {
     const root = window.document.documentElement
@@ -51,6 +64,8 @@ export function ThemeProvider({
   const value = {
     theme,
     setTheme: (theme: Theme) => {
+      if (locked) return
+
       localStorage.setItem(storageKey, theme)
       setTheme(theme)
     },
