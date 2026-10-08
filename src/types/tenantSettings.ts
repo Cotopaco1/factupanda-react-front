@@ -22,6 +22,15 @@ export type TenantSettings = {
         size: number;
         updated_at: string;
     } | null;
+    /** Se rellena cuando el API retira un logo que no puede procesar. */
+    logo_invalidated?: {
+        reason: string;
+        width: number;
+        height: number;
+        megapixels: number;
+        max_megapixels: number;
+        at: string;
+    } | null;
     primary_color: string | null;
     secondary_color: string | null;
     template: string;

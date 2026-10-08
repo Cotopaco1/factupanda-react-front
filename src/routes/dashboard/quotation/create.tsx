@@ -32,6 +32,7 @@ import { ButtonLoader } from '@/components/ButtonLoader'
 import { MergeServerErrorsToForm } from '@/services/errorService'
 import { useDocumentTitle } from '@/hooks/useDocumentTitle'
 import { DonationDomainAlertBanner } from '@/components/banners/DonationDomainAlertBanner'
+import { LogoInvalidatedAlertBanner } from '@/components/banners/LogoInvalidatedAlertBanner'
 import { useBannerAlertService } from '@/services/bannerAlerts'
 import { toast } from 'sonner'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
@@ -462,6 +463,7 @@ function RouteComponent() {
       breadcrumb={breadcrumb}
     >
       <div>
+        <LogoInvalidatedAlertBanner/>
         <DonationDomainAlertBanner open={donationDialogOpen} setOpen={setDonationDialogOpen}/>
         <DialogQuantity open={dialogQuantityOpen} setOpen={setDialogQuantityOpen} cb={cbDialogQuantity} />
         <DialogPdfQuotation open={pdfOpen} setOpen={setPdfOpen} url={pdfUrl}/>
